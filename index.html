@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
-  <!-- Tailwind CSS & FontAwesome (Sesuai Permintaan) -->
+  <!-- Tailwind CSS & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -62,7 +62,7 @@
 
     // =====================================================================
     // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
-    // PENTING: Pastikan URL berakhiran /exec (Bukan /edit)
+    // PENTING: Pastikan URL berakhiran /exec
     const API_URL = "https://script.google.com/macros/s/AKfycbzQW9_OxIOsX83VlPOCLT_6Fk_faXsNVb_T6InTUvRiLIc2W7st_GQPDjr7F-tVGx-w/exec"; 
     // =====================================================================
 
@@ -113,7 +113,6 @@
       const muatData = async () => {
         setIsLoading(true);
         try {
-          // Logika Fetch Super Aman (Menggunakan redirect: 'follow')
           const response = await fetch(API_URL + "?action=getData", { redirect: 'follow' });
           if (!response.ok) throw new Error("Gagal terhubung ke jaringan Google.");
           
@@ -122,7 +121,7 @@
           try {
             res = JSON.parse(textResponse);
           } catch(e) {
-            throw new Error("Link API Salah! Pastikan URL berakhiran /exec dan Apps Script sudah di-Deploy versi baru.");
+            throw new Error("Link API Salah! Pastikan URL berakhiran /exec dan Apps Script sudah di-Deploy.");
           }
           
           if(res && res.status === 'success') {
@@ -217,6 +216,7 @@
 
       const recentFiles = useMemo(() => rawSheetData.slice(0, 5), [rawSheetData]);
 
+      // LOGIKA FILTER PERSIS ASLINYA
       const getFilteredList = (tipe, searchQ, katQ) => {
         let f = rawSheetData.filter(r => (r[3] || '').toLowerCase().includes(tipe));
         if (searchQ) f = f.filter(r => (r[9] || '').toLowerCase().includes(searchQ.toLowerCase()) || (r[6] || '').toLowerCase().includes(searchQ.toLowerCase()));
@@ -249,15 +249,19 @@
                   </span>
                   <small className="text-slate-400 text-[10px] font-bold bg-slate-100 px-2 py-1 rounded-lg">{r[2]}</small>
                 </div>
-                <b className="text-slate-800 block text-base font-bold mb-2 leading-snug group-hover:text-brand-600 transition-colors line-clamp-2 break-words">{r[9]}</b>
-                <small className="text-slate-500 block text-xs font-semibold mb-3"><i className="fa-solid fa-hashtag text-slate-300 mr-1"></i> {r[6]}</small>
                 
+                <b className="text-slate-800 block text-base font-bold mb-1 leading-snug group-hover:text-brand-600 transition-colors line-clamp-2 break-words">{r[9]}</b>
+                
+                {/* LOGIKA YANG HILANG DIKEMBALIKAN: MENAMPILKAN NOMOR SURAT DAN SIFAT SURAT (BIASA/PENTING) */}
+                <small className="text-slate-500 block text-xs font-semibold mb-3">No: <span className="font-bold text-slate-700">{r[6]}</span> • Sifat: <span className="font-bold text-rose-500">{r[4]}</span></small>
+                
+                {/* LOGIKA YANG HILANG DIKEMBALIKAN: FORMAT D: (DARI) dan K: (KE) */}
                 <div className="flex gap-2 flex-wrap">
                   <small className="flex items-center gap-1.5 text-emerald-600 text-[10px] font-bold bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-lg line-clamp-1">
-                    <i className="fa-solid fa-arrow-down flex-shrink-0"></i> <span className="line-clamp-1">{r[7]}</span>
+                    DARI: <span className="line-clamp-1">{r[7]}</span>
                   </small>
                   <small className="flex items-center gap-1.5 text-indigo-600 text-[10px] font-bold bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-lg line-clamp-1">
-                    <i className="fa-solid fa-arrow-up flex-shrink-0"></i> <span className="line-clamp-1">{r[8]}</span>
+                    KE: <span className="line-clamp-1">{r[8]}</span>
                   </small>
                 </div>
               </div>
@@ -277,8 +281,8 @@
       return (
         <div className="min-h-screen pb-32 font-sans relative">
           
-          <div className={`fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold z-[9999] transition-all duration-400 ${toast.show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-10 scale-95 pointer-events-none'} ${toast.isError ? 'bg-rose-500 text-white' : 'bg-slate-800 text-white'}`}>
-            <i className={`${toast.isError ? 'fa-solid fa-triangle-exclamation text-rose-300' : 'fa-solid fa-circle-check text-emerald-400'} text-xl`}></i>
+          <div className={`fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold z-[9999] transition-all duration-400 ${toast.show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-10 scale-95 pointer-events-none'} ${toast.isError ? 'bg-rose-500 text-white' : 'bg-emerald-500 text-white'}`}>
+            <i className={`${toast.isError ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check'} text-xl`}></i>
             {toast.msg}
           </div>
 
@@ -341,6 +345,7 @@
                 })}
               </div>
 
+              {/* FITUR BACA FILE DRIVE SESUAI PERMINTAAN SEBELUMNYA */}
               <SectionTitle icon="fa-brands fa-google-drive" title="File Google Drive" />
               <div className="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200 mb-4">
                 <div className="relative mb-3 p-2">
@@ -425,12 +430,15 @@
             ))}
           </div>
 
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[420px] glass-nav border-2 border-white/60 rounded-[2rem] flex justify-between items-center px-3 py-3 z-[100] shadow-[0_10px_40px_rgba(0,0,0,0.15)]">
-            <button onClick={() => setActiveTab('dash')} className={`flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-2xl transition-all ${activeTab === 'dash' ? 'text-brand-600 bg-brand-50' : 'text-slate-400 hover:text-slate-600'}`}>
-              <i className={`fa-solid fa-house text-xl ${activeTab === 'dash' ? 'drop-shadow-sm' : ''}`}></i>
+          {/* TEKS NAVIGASI BAWAH YANG HILANG TELAH DIKEMBALIKAN! */}
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[450px] glass-nav border-2 border-white/60 rounded-[2rem] flex justify-between items-center px-2 py-2 z-[100] shadow-[0_10px_40px_rgba(0,0,0,0.15)]">
+            <button onClick={() => setActiveTab('dash')} className={`flex flex-col items-center justify-center flex-1 h-14 rounded-2xl transition-all ${activeTab === 'dash' ? 'text-brand-600 bg-brand-50' : 'text-slate-400 hover:text-slate-600'}`}>
+              <i className={`fa-solid fa-chart-pie text-[1.1rem] mb-1 ${activeTab === 'dash' ? 'drop-shadow-sm' : ''}`}></i>
+              <span className="text-[9px] font-black tracking-widest">DASHBOARD</span>
             </button>
-            <button onClick={() => setActiveTab('masuk')} className={`flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-2xl transition-all ${activeTab === 'masuk' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}>
-              <i className={`fa-solid fa-inbox text-xl ${activeTab === 'masuk' ? 'drop-shadow-sm' : ''}`}></i>
+            <button onClick={() => setActiveTab('masuk')} className={`flex flex-col items-center justify-center flex-1 h-14 rounded-2xl transition-all ${activeTab === 'masuk' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}>
+              <i className={`fa-solid fa-inbox text-[1.1rem] mb-1 ${activeTab === 'masuk' ? 'drop-shadow-sm' : ''}`}></i>
+              <span className="text-[9px] font-black tracking-widest">MASUK</span>
             </button>
             
             <div className="relative -top-8 mx-1">
@@ -439,11 +447,13 @@
               </button>
             </div>
 
-            <button onClick={() => setActiveTab('keluar')} className={`flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-2xl transition-all ${activeTab === 'keluar' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600'}`}>
-              <i className={`fa-solid fa-paper-plane text-xl ${activeTab === 'keluar' ? 'drop-shadow-sm' : ''}`}></i>
+            <button onClick={() => setActiveTab('keluar')} className={`flex flex-col items-center justify-center flex-1 h-14 rounded-2xl transition-all ${activeTab === 'keluar' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600'}`}>
+              <i className={`fa-solid fa-paper-plane text-[1.1rem] mb-1 ${activeTab === 'keluar' ? 'drop-shadow-sm' : ''}`}></i>
+              <span className="text-[9px] font-black tracking-widest">KELUAR</span>
             </button>
-            <button onClick={muatData} className="flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-2xl text-slate-400 hover:text-amber-500 hover:bg-amber-50 transition-all">
-              <i className="fa-solid fa-rotate-right text-xl"></i>
+            <button onClick={muatData} className="flex flex-col items-center justify-center flex-1 h-14 rounded-2xl text-slate-400 hover:text-amber-500 hover:bg-amber-50 transition-all">
+              <i className="fa-solid fa-rotate-right text-[1.1rem] mb-1"></i>
+              <span className="text-[9px] font-black tracking-widest">REFRESH</span>
             </button>
           </div>
 
@@ -515,9 +525,9 @@
                       <input type="text" name="namaPenginput" required placeholder="Nama Anda..." className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all" value={formData.namaPenginput} onChange={handleInputChange} />
                     </div>
                     <div className="col-span-2">
-                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Dokumen Scan (Maks 3MB)</label>
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Upload File (Semua Format - Maks 3MB)</label>
                       <div className="relative overflow-hidden">
-                        <input type="file" ref={fileInputRef} className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-3 py-3 focus:border-brand-500 focus:bg-white outline-none file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-brand-100 file:text-brand-600 hover:file:bg-brand-200 cursor-pointer" accept="image/*,application/pdf" />
+                        <input type="file" ref={fileInputRef} className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-3 py-3 focus:border-brand-500 focus:bg-white outline-none file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-brand-100 file:text-brand-600 hover:file:bg-brand-200 cursor-pointer" />
                       </div>
                     </div>
                   </form>
