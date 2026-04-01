@@ -39,14 +39,10 @@
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     
-    .btn-3d {
-      transition: all 0.15s ease;
-    }
-    .btn-3d:active {
-      transform: translateY(4px);
-      box-shadow: 0 0px 0 0 transparent !important;
-    }
+    .btn-3d { transition: all 0.15s ease; }
+    .btn-3d:active { transform: translateY(4px); box-shadow: 0 0px 0 0 transparent !important; }
 
     /* Glass Effect */
     .glass-nav {
@@ -54,15 +50,11 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
-    
-    .floating-nav {
-      padding-bottom: env(safe-area-inset-bottom, 16px);
-    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 selection:bg-brand-100">
 
-  <!-- Loader Awal Bawaan (Untuk Mempercepat Tampilan Awal Sebelum React Aktif) -->
+  <!-- Loader Awal Bawaan (Mempercepat Tampilan Awal) -->
   <div id="root">
     <div class="fixed inset-0 bg-slate-50 z-[9999] flex flex-col items-center justify-center">
       <div class="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center">
@@ -76,11 +68,10 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     // =====================================================================
-    // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
-    const API_URL = "https://script.google.com/macros/s/AKfycbyYVLgBAJj3q2PdPzNVChE7CzNLs7VRBWs2aZWiT_dU3yD1kI9edd69SVPgKIXBm039/exec"; 
+    // GANTI LINK DI BAWAH INI DENGAN URL API WEB APP ANDA YANG BARU
+    const API_URL = "https://script.google.com/macros/s/AKfycbzs2enDrFzNF9DeHJ3jeXFFpH3Ze_gnO4L1V86WCbgCkuW3T1CHUI11KAb-alu5emU/exec"; 
     // =====================================================================
 
-    // Helper Ikon Kategori
     const getCategoryIconInfo = (kategori) => {
       const map = {
         'Pemberitahuan': { icon: 'bi-bell-fill', color: 'text-amber-500', bg: 'bg-amber-100' },
@@ -94,12 +85,11 @@
     };
 
     function App() {
-      // 1. FITUR BARU: Mengingat tab saat direfresh
+      // Mengingat tab saat direfresh
       const [activeTab, setActiveTab] = useState(() => {
         return localStorage.getItem('eArsipActiveTab') || 'dash';
       });
 
-      // Simpan perubahan tab ke localStorage
       useEffect(() => {
         localStorage.setItem('eArsipActiveTab', activeTab);
       }, [activeTab]);
@@ -131,20 +121,32 @@
 
       const showToast = (msg, isError = false) => {
         setToast({ show: true, msg, isError });
-        setTimeout(() => setToast({ show: false, msg: '', isError: false }), 3000);
+        setTimeout(() => setToast({ show: false, msg: '', isError: false }), 4500);
       };
 
       const muatData = async () => {
         setIsLoading(true);
         try {
           const response = await fetch(API_URL + "?action=getData");
-          const res = await response.json();
+          const textResponse = await response.text();
           
-          setRawSheetData(res.sheetData.tableData || []);
-          setStats(res.sheetData.stats || { masuk: 0, keluar: 0, kategori: {} });
-          setRawDriveData(res.driveData || []);
+          let res;
+          try {
+            res = JSON.parse(textResponse);
+          } catch(e) {
+            // ERROR HANDLING SANGAT AMAN: Mencegah layar putih blank!
+            throw new Error("API tidak valid! Pastikan Code.gs sudah di-Deploy versi baru.");
+          }
+          
+          if(res && res.status === 'success') {
+            setRawSheetData((res.sheetData && res.sheetData.tableData) ? res.sheetData.tableData : []);
+            setStats((res.sheetData && res.sheetData.stats) ? res.sheetData.stats : { masuk: 0, keluar: 0, kategori: {} });
+            setRawDriveData(res.driveData ? res.driveData : []);
+          } else {
+            throw new Error("Gagal mengambil data dari Database.");
+          }
         } catch (err) {
-          showToast("Gagal memuat data. Periksa koneksi/URL API.", true);
+          showToast(err.message || "Gagal memuat data. Periksa koneksi/URL API.", true);
         } finally {
           setIsLoading(false);
         }
@@ -206,12 +208,12 @@
             });
             const data = await response.json();
             
-            if (data.status === 'success') {
+            if (data && data.status === 'success') {
               showToast(data.message);
               setIsModalOpen(false);
               muatData();
             } else {
-              showToast("Gagal: " + data.message, true);
+              showToast("Gagal: " + (data ? data.message : "Tidak ada respon"), true);
             }
           } catch (err) {
             showToast("Terjadi kesalahan jaringan.", true);
@@ -239,7 +241,7 @@
 
       const gotoKat = (k) => {
         const s = rawSheetData.find(r => r[5] === k);
-        const v = (s && s[3].toLowerCase().includes('keluar')) ? 'keluar' : 'masuk';
+        const v = (s && s[3] && s[3].toLowerCase().includes('keluar')) ? 'keluar' : 'masuk';
         setActiveTab(v);
         if (v === 'keluar') setKatKeluar(k);
         else setKatMasuk(k);
@@ -252,7 +254,7 @@
       };
 
       const filteredDriveFiles = useMemo(() => {
-        return rawDriveData.filter(f => f.name.toLowerCase().includes(searchDrive.toLowerCase()));
+        return rawDriveData.filter(f => f && f.name && f.name.toLowerCase().includes(searchDrive.toLowerCase()));
       }, [rawDriveData, searchDrive]);
 
       const recentFiles = useMemo(() => rawSheetData.slice(0, 5), [rawSheetData]);
@@ -271,7 +273,6 @@
       const listMasuk = useMemo(() => getFilteredList('masuk', searchMasuk, katMasuk), [rawSheetData, searchMasuk, katMasuk]);
       const listKeluar = useMemo(() => getFilteredList('keluar', searchKeluar, katKeluar), [rawSheetData, searchKeluar, katKeluar]);
 
-      // Komponen UI Modern
       const SectionTitle = ({ icon, title }) => (
         <h6 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4 mt-6">
           <div className="w-8 h-8 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center">
@@ -285,7 +286,6 @@
         const catInfo = getCategoryIconInfo(r[5]);
         return (
           <div className="bg-white p-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-slate-100 mb-3 hover:shadow-md transition-shadow relative overflow-hidden group">
-            {/* Aksen warna di kiri */}
             <div className={`absolute left-0 top-0 bottom-0 w-1 ${catInfo.bg}`}></div>
             
             <div className="flex justify-between items-start pl-2">
@@ -296,16 +296,16 @@
                   </span>
                   <small className="text-slate-400 text-[10px] font-semibold">{r[2]}</small>
                 </div>
-                {/* 2. FITUR BARU: line-clamp-2 mencegah teks panjang terpotong langsung, memungkinkannya 2 baris */}
+                {/* Teks tidak terpotong langsung, maksimal 2 baris */}
                 <b className="text-slate-800 block text-sm mb-2 leading-snug group-hover:text-brand-600 transition-colors line-clamp-2 break-words">{r[9]}</b>
                 <small className="text-slate-500 block text-xs font-medium mb-2">No: {r[6]}</small>
                 
                 <div className="flex gap-2 flex-wrap">
                   <small className="flex items-center gap-1 text-emerald-600 text-[10px] font-semibold bg-emerald-50 px-2 py-1 rounded-md line-clamp-1">
-                    <i className="bi bi-person-down flex-shrink-0"></i> {r[7]}
+                    <i className="bi bi-person-down flex-shrink-0"></i> <span className="line-clamp-1 break-words">{r[7]}</span>
                   </small>
                   <small className="flex items-center gap-1 text-indigo-600 text-[10px] font-semibold bg-indigo-50 px-2 py-1 rounded-md line-clamp-1">
-                    <i className="bi bi-person-up flex-shrink-0"></i> {r[8]}
+                    <i className="bi bi-person-up flex-shrink-0"></i> <span className="line-clamp-1 break-words">{r[8]}</span>
                   </small>
                 </div>
               </div>
@@ -326,13 +326,11 @@
       return (
         <div className="min-h-screen pb-32 font-sans bg-slate-50/50">
           
-          {/* Toast Notification Modern */}
           <div className={`fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full shadow-xl flex items-center gap-3 text-sm font-bold z-[9999] transition-all duration-400 ${toast.show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-10 scale-95 pointer-events-none'} ${toast.isError ? 'bg-rose-500 text-white' : 'bg-slate-800 text-white'}`}>
             <i className={`bi ${toast.isError ? 'bi-exclamation-triangle-fill text-rose-300' : 'bi-check-circle-fill text-emerald-400'} text-xl`}></i>
             {toast.msg}
           </div>
 
-          {/* Loader 3D */}
           {isLoading && (
             <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center">
               <div className="bg-white p-6 rounded-3xl shadow-2xl flex flex-col items-center animate-[pulse_1.5s_infinite]">
@@ -342,7 +340,6 @@
             </div>
           )}
 
-          {/* Header Glassmorphism */}
           <div className="glass-nav px-5 py-4 flex justify-between items-center sticky top-0 z-40 border-b border-white">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 bg-white rounded-2xl shadow-sm p-1 border border-slate-100">
@@ -358,10 +355,8 @@
             </button>
           </div>
 
-          {/* Main Content */}
           <div className="p-5 max-w-2xl mx-auto">
             
-            {/* VIEW: DASHBOARD */}
             <div className={activeTab === 'dash' ? 'block animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
               
               <SectionTitle icon="bi-bar-chart-line-fill" title="Statistik Surat" />
@@ -381,7 +376,7 @@
 
               <SectionTitle icon="bi-grid-fill" title="Kategori Arsip" />
               <div className="grid grid-cols-3 gap-3 mb-2">
-                {Object.keys(stats.kategori).map((k) => {
+                {Object.keys(stats.kategori || {}).map((k) => {
                   const catInfo = getCategoryIconInfo(k);
                   return (
                     <div key={k} onClick={() => gotoKat(k)} className="bg-white rounded-2xl p-4 text-center shadow-sm border border-slate-100 cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-center items-center gap-2">
@@ -390,7 +385,6 @@
                       </div>
                       <div className="w-full">
                         <b className="text-slate-800 block text-lg leading-none">{stats.kategori[k]}</b>
-                        {/* 3. FITUR BARU: Mengubah truncate agar tidak memotong tulisan penting */}
                         <small className="text-[10px] text-slate-500 font-bold uppercase mt-1 block px-1 text-center leading-tight line-clamp-2">{k}</small>
                       </div>
                     </div>
@@ -414,8 +408,8 @@
                   {rawDriveData.length === 0 ? (
                     <div className="text-center text-slate-400 py-6 px-4 text-sm font-medium bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                       <i className="bi bi-cloud-slash-fill text-2xl text-slate-300 block mb-2"></i>
-                      Belum ada file terbaca / Backend belum di-update.<br/>
-                      <small className="font-normal text-[10px] mt-1 text-slate-400 block">Pastikan Code.gs terbaru sudah dipasang di Apps Script.</small>
+                      Belum ada file terbaca.<br/>
+                      <small className="font-normal text-[10px] mt-1 text-slate-400 block">Pastikan ID Folder Drive sudah benar di Apps Script.</small>
                     </div>
                   ) : filteredDriveFiles.length === 0 ? (
                     <div className="text-center text-slate-400 py-6 text-sm font-medium bg-slate-50 rounded-2xl border border-dashed border-slate-200">Pencarian tidak ditemukan</div>
@@ -427,7 +421,6 @@
                             <i className="bi bi-file-earmark-fill text-xl"></i>
                           </div>
                           <div className="min-w-0 flex-1">
-                            {/* 4. FITUR BARU: line-clamp-2 mencegah teks panjang terpotong langsung, memungkinkannya 2 baris */}
                             <div className="text-sm font-bold text-slate-700 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug" title={f.name}>{f.name}</div>
                             <small className="text-slate-400 text-[10px] font-semibold flex items-center gap-1 mt-1">
                               <i className="bi bi-cloud-check-fill text-emerald-500"></i> Diupload: {f.date}
@@ -450,7 +443,6 @@
                     <div className="flex items-center gap-3 max-w-[80%]">
                       <div className="w-2 h-2 rounded-full bg-brand-500 flex-shrink-0"></div>
                       <div>
-                        {/* 5. FITUR BARU: Mengubah truncate agar judul surat yang panjang tidak terpotong cepat */}
                         <div className="text-sm text-slate-800 font-bold line-clamp-2 break-words leading-snug">{r[9]}</div>
                         <small className="text-slate-400 text-[10px] font-semibold block mt-1">{r[2]} • {r[6]}</small>
                       </div>
@@ -493,7 +485,7 @@
                     onChange={(e) => tipe === 'masuk' ? setKatMasuk(e.target.value) : setKatKeluar(e.target.value)}
                   >
                     <option value="">Semua Kategori</option>
-                    {Object.keys(stats.kategori).map(k => <option key={k} value={k}>{k}</option>)}
+                    {Object.keys(stats.kategori || {}).map(k => <option key={k} value={k}>{k}</option>)}
                   </select>
                 </div>
 
@@ -508,7 +500,6 @@
 
           </div>
 
-          {/* Navigasi Bawah Mengambang (Floating Pill) */}
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] glass-nav border border-white/60 rounded-full flex justify-between items-center px-2 py-2 z-[100] shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
             
             <button onClick={() => setActiveTab('dash')} className={`flex flex-col items-center justify-center w-16 h-12 rounded-full transition-all ${activeTab === 'dash' ? 'text-brand-600 bg-brand-50' : 'text-slate-400 hover:text-slate-600'}`}>
@@ -519,7 +510,6 @@
               <i className={`bi bi-box-arrow-in-down text-xl mb-0.5 ${activeTab === 'masuk' ? 'drop-shadow-sm' : ''}`}></i>
             </button>
             
-            {/* Tombol Add 3D Center */}
             <div className="relative -top-8 mx-1">
               <button onClick={openModalForAdd} className="btn-3d w-16 h-16 bg-gradient-to-tr from-brand-500 to-brand-400 text-white rounded-full flex items-center justify-center shadow-[0_6px_0_#0284c7,0_15px_20px_rgba(14,165,233,0.4)] border-4 border-slate-50/50">
                 <i className="bi bi-plus text-4xl"></i>
@@ -535,12 +525,10 @@
             </button>
           </div>
 
-          {/* Modal Form Modern Bottom Sheet */}
           {isModalOpen && (
             <div className="fixed inset-0 z-[1001] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
               <div className="bg-white w-full max-w-lg rounded-t-[2rem] sm:rounded-3xl max-h-[90vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 duration-300">
                 
-                {/* Drag Handle Indicator */}
                 <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 sm:hidden"></div>
 
                 <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
@@ -625,7 +613,6 @@
                   </form>
                 </div>
 
-                {/* Tombol Simpan 3D */}
                 <div className="p-6 border-t border-slate-100 bg-white sm:rounded-b-3xl">
                   <button type="submit" form="fArsip" className="btn-3d w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-500 to-brand-400 text-white font-extrabold tracking-widest text-sm py-4 rounded-2xl shadow-[0_6px_0_#0284c7] hover:shadow-[0_2px_0_#0284c7] focus:outline-none">
                     SIMPAN ARSIP <i className="bi bi-send-fill text-lg animate-pulse"></i>
