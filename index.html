@@ -393,26 +393,34 @@
                     onChange={(e) => setSearchDrive(e.target.value)}
                   />
                 </div>
-                <div className="max-h-[260px] overflow-y-auto px-2 pb-2 space-y-2 custom-scrollbar">
-                  {filteredDriveFiles.length === 0 ? (
-                    <div className="text-center text-slate-400 py-6 text-sm font-medium bg-slate-50 rounded-2xl border border-dashed border-slate-200">File tidak ditemukan</div>
+                <div className="max-h-[300px] overflow-y-auto px-2 pb-2 space-y-3 custom-scrollbar">
+                  {rawDriveData.length === 0 ? (
+                    <div className="text-center text-slate-400 py-6 px-4 text-sm font-medium bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                      <i className="bi bi-cloud-slash-fill text-2xl text-slate-300 block mb-2"></i>
+                      Belum ada file terbaca / Backend belum di-update.<br/>
+                      <small className="font-normal text-[10px] mt-1 text-slate-400 block">Pastikan Code.gs terbaru sudah dipasang di Apps Script.</small>
+                    </div>
+                  ) : filteredDriveFiles.length === 0 ? (
+                    <div className="text-center text-slate-400 py-6 text-sm font-medium bg-slate-50 rounded-2xl border border-dashed border-slate-200">Pencarian tidak ditemukan</div>
                   ) : (
                     filteredDriveFiles.map((f, i) => (
-                      <div key={i} className="group bg-white p-3 rounded-2xl border border-slate-100 hover:border-brand-200 hover:shadow-md transition-all flex justify-between items-center cursor-pointer" onClick={() => window.open(f.url, '_blank')}>
-                        <div className="flex items-center gap-3 max-w-[85%]">
-                          <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-500 flex flex-shrink-0 items-center justify-center">
-                            <i className="bi bi-file-earmark-pdf-fill text-lg"></i>
+                      <div key={i} className="group bg-white p-3 rounded-2xl border border-slate-100 hover:border-brand-200 hover:shadow-md transition-all flex justify-between items-center">
+                        <div className="flex items-center gap-3 max-w-[80%] overflow-hidden">
+                          <div className="w-11 h-11 rounded-xl bg-sky-50 text-sky-500 flex flex-shrink-0 items-center justify-center">
+                            <i className="bi bi-file-earmark-fill text-xl"></i>
                           </div>
-                          <div>
-                            <div className="text-sm font-bold text-slate-700 truncate group-hover:text-brand-600 transition-colors">{f.name}</div>
+                          <div className="min-w-0">
+                            {/* Nama file dibuat utuh dan bisa di-truncate jika terlalu panjang */}
+                            <div className="text-sm font-bold text-slate-700 truncate group-hover:text-brand-600 transition-colors" title={f.name}>{f.name}</div>
                             <small className="text-slate-400 text-[10px] font-semibold flex items-center gap-1 mt-0.5">
-                              <i className="bi bi-cloud-check-fill text-emerald-500"></i> {f.date}
+                              <i className="bi bi-cloud-check-fill text-emerald-500"></i> Diupload: {f.date}
                             </small>
                           </div>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-slate-50 text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-500 flex items-center justify-center transition-colors">
-                          <i className="bi bi-chevron-right"></i>
-                        </div>
+                        {/* Tombol Download Khusus */}
+                        <a href={f.url} target="_blank" rel="noreferrer" title="Download File" className="w-10 h-10 rounded-full bg-slate-50 text-brand-500 hover:bg-brand-500 hover:text-white flex flex-shrink-0 items-center justify-center transition-colors border border-slate-100 shadow-sm btn-3d">
+                          <i className="bi bi-cloud-download-fill text-lg"></i>
+                        </a>
                       </div>
                     ))
                   )}
