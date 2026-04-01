@@ -1,501 +1,485 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { 
-  LayoutGrid, 
-  Inbox, 
-  Send, 
-  PlusCircle, 
-  RefreshCcw, 
-  Eye, 
-  Pencil, 
-  Cloud, 
-  ExternalLink, 
-  HeartPulse, 
-  CheckCircle,
-  X,
-  AlertCircle
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>E-ARSIP PKH TAPIN</title>
+  <link rel="icon" href="https://lh3.googleusercontent.com/d/1k2xBp0kGKwnVMStAwSGcNM023CIyfBxS" type="image/png">
+  
+  <!-- CDN Tailwind CSS & Bootstrap Icons (Tanpa perlu install npm) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  
+  <!-- CDN React & Babel Standalone (Agar JSX jalan di browser tanpa build) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
-// =====================================================================
-// MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
-const API_URL = "https://script.google.com/macros/s/AKfycbykMef5XLgE_KQPa8afzHomHzpQcE7iD_1Zo5SU_xxS71x1md6xMHKThNt55UzYp5rr/exec"; 
-// =====================================================================
+  <style>
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 selection:bg-sky-200">
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState('dash');
-  const [isLoading, setIsLoading] = useState(false);
-  const [toast, setToast] = useState({ show: false, msg: '', isError: false });
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  <!-- Wadah Utama Aplikasi React -->
+  <div id="root"></div>
 
-  // Data State
-  const [rawSheetData, setRawSheetData] = useState([]);
-  const [rawDriveData, setRawDriveData] = useState([]);
-  const [stats, setStats] = useState({ masuk: 0, keluar: 0, kategori: {} });
+  <!-- Script React via Babel -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useMemo } = React;
 
-  // Filter & Search State
-  const [searchDrive, setSearchDrive] = useState('');
-  const [searchMasuk, setSearchMasuk] = useState('');
-  const [katMasuk, setKatMasuk] = useState('');
-  const [searchKeluar, setSearchKeluar] = useState('');
-  const [katKeluar, setKatKeluar] = useState('');
+    // =====================================================================
+    // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
+    const API_URL = "https://script.google.com/macros/s/AKfycbzyQ6C75xJLwK3IDDKvSLMZ0u-0A6kdyI4Zmwt3ozQ3F_2UdU6VP_TksfAbCO5_JOV3/exec"; 
+    // =====================================================================
 
-  // Form State
-  const fileInputRef = useRef(null);
-  const [formData, setFormData] = useState({
-    id: '', existingFileId: '', tglSurat: '', jenis: 'Surat Masuk', 
-    kategori: 'Pemberitahuan', sifat: 'Biasa', noSurat: '', 
-    pengirim: '', penerima: '', perihal: '', namaPenginput: ''
-  });
+    function App() {
+      const [activeTab, setActiveTab] = useState('dash');
+      const [isLoading, setIsLoading] = useState(false);
+      const [toast, setToast] = useState({ show: false, msg: '', isError: false });
+      const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    muatData();
-  }, []);
+      // Data State
+      const [rawSheetData, setRawSheetData] = useState([]);
+      const [rawDriveData, setRawDriveData] = useState([]);
+      const [stats, setStats] = useState({ masuk: 0, keluar: 0, kategori: {} });
 
-  const showToast = (msg, isError = false) => {
-    setToast({ show: true, msg, isError });
-    setTimeout(() => setToast({ show: false, msg: '', isError: false }), 3000);
-  };
+      // Filter & Search State
+      const [searchDrive, setSearchDrive] = useState('');
+      const [searchMasuk, setSearchMasuk] = useState('');
+      const [katMasuk, setKatMasuk] = useState('');
+      const [searchKeluar, setSearchKeluar] = useState('');
+      const [katKeluar, setKatKeluar] = useState('');
 
-  const muatData = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(API_URL + "?action=getData");
-      const res = await response.json();
-      
-      setRawSheetData(res.sheetData.tableData || []);
-      setStats(res.sheetData.stats || { masuk: 0, keluar: 0, kategori: {} });
-      setRawDriveData(res.driveData || []);
-    } catch (err) {
-      showToast("Gagal memuat data. Periksa koneksi/URL API.", true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const openModalForAdd = () => {
-    setFormData({
-      id: '', existingFileId: '', tglSurat: '', jenis: 'Surat Masuk', 
-      kategori: 'Pemberitahuan', sifat: 'Biasa', noSurat: '', 
-      pengirim: '', penerima: '', perihal: '', namaPenginput: ''
-    });
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    setIsModalOpen(true);
-  };
-
-  const editData = (id) => {
-    const r = rawSheetData.find(x => x[0] === id);
-    if (r) {
-      setFormData({
-        id: r[0], 
-        tglSurat: r[2] ? r[2].split('/').reverse().join('-') : '', 
-        jenis: r[3], 
-        sifat: r[4], 
-        kategori: r[5], 
-        noSurat: r[6],
-        pengirim: r[7], 
-        penerima: r[8], 
-        perihal: r[9], 
-        existingFileId: r[10], 
-        namaPenginput: r[11]
+      // Form State
+      const fileInputRef = useRef(null);
+      const [formData, setFormData] = useState({
+        id: '', existingFileId: '', tglSurat: '', jenis: 'Surat Masuk', 
+        kategori: 'Pemberitahuan', sifat: 'Biasa', noSurat: '', 
+        pengirim: '', penerima: '', perihal: '', namaPenginput: ''
       });
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      setIsModalOpen(true);
-    }
-  };
 
-  const handleSimpan = async (e) => {
-    e.preventDefault();
-    const fl = fileInputRef.current?.files[0];
-    
-    // Validasi Ukuran File (Max 3MB)
-    if (fl && fl.size > 3 * 1024 * 1024) {
-      showToast("Ukuran file maksimal 3MB!", true);
-      return;
-    }
+      useEffect(() => {
+        muatData();
+      }, []);
 
-    setIsLoading(true);
-    
-    const sendData = async (objData) => {
-      try {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(objData),
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-        });
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-          showToast(data.message);
-          setIsModalOpen(false);
-          muatData();
-        } else {
-          showToast("Gagal: " + data.message, true);
-        }
-      } catch (err) {
-        showToast("Terjadi kesalahan jaringan.", true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (fl) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const payload = {
-          ...formData,
-          fileData: ev.target.result.split(',')[1],
-          mimeType: fl.type,
-          fileName: fl.name
-        };
-        sendData(payload);
+      const showToast = (msg, isError = false) => {
+        setToast({ show: true, msg, isError });
+        setTimeout(() => setToast({ show: false, msg: '', isError: false }), 3000);
       };
-      reader.readAsDataURL(fl);
-    } else {
-      sendData(formData);
-    }
-  };
 
-  const gotoKat = (k) => {
-    const s = rawSheetData.find(r => r[5] === k);
-    const v = (s && s[3].toLowerCase().includes('keluar')) ? 'keluar' : 'masuk';
-    setActiveTab(v);
-    if (v === 'keluar') setKatKeluar(k);
-    else setKatMasuk(k);
-  };
+      const muatData = async () => {
+        setIsLoading(true);
+        try {
+          const response = await fetch(API_URL + "?action=getData");
+          const res = await response.json();
+          
+          setRawSheetData(res.sheetData.tableData || []);
+          setStats(res.sheetData.stats || { masuk: 0, keluar: 0, kategori: {} });
+          setRawDriveData(res.driveData || []);
+        } catch (err) {
+          showToast("Gagal memuat data. Periksa koneksi/URL API.", true);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-  const exitApp = () => {
-    if (window.confirm("Keluar dari aplikasi?")) {
-      window.location.href = "https://google.com";
-    }
-  };
+      const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+      };
 
-  // Derived Data Memos
-  const filteredDriveFiles = useMemo(() => {
-    return rawDriveData.filter(f => f.name.toLowerCase().includes(searchDrive.toLowerCase()));
-  }, [rawDriveData, searchDrive]);
+      const openModalForAdd = () => {
+        setFormData({
+          id: '', existingFileId: '', tglSurat: '', jenis: 'Surat Masuk', 
+          kategori: 'Pemberitahuan', sifat: 'Biasa', noSurat: '', 
+          pengirim: '', penerima: '', perihal: '', namaPenginput: ''
+        });
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        setIsModalOpen(true);
+      };
 
-  const recentFiles = useMemo(() => rawSheetData.slice(0, 5), [rawSheetData]);
+      const editData = (id) => {
+        const r = rawSheetData.find(x => x[0] === id);
+        if (r) {
+          setFormData({
+            id: r[0], 
+            tglSurat: r[2] ? r[2].split('/').reverse().join('-') : '', 
+            jenis: r[3], 
+            sifat: r[4], 
+            kategori: r[5], 
+            noSurat: r[6],
+            pengirim: r[7], 
+            penerima: r[8], 
+            perihal: r[9], 
+            existingFileId: r[10], 
+            namaPenginput: r[11]
+          });
+          if (fileInputRef.current) fileInputRef.current.value = '';
+          setIsModalOpen(true);
+        }
+      };
 
-  const getFilteredList = (tipe, searchQ, katQ) => {
-    let f = rawSheetData.filter(r => (r[3] || '').toLowerCase().includes(tipe));
-    if (searchQ) {
-      f = f.filter(r => (r[9] || '').toLowerCase().includes(searchQ.toLowerCase()) || (r[6] || '').toLowerCase().includes(searchQ.toLowerCase()));
-    }
-    if (katQ) {
-      f = f.filter(r => r[5] === katQ);
-    }
-    return f;
-  };
-
-  const listMasuk = useMemo(() => getFilteredList('masuk', searchMasuk, katMasuk), [rawSheetData, searchMasuk, katMasuk]);
-  const listKeluar = useMemo(() => getFilteredList('keluar', searchKeluar, katKeluar), [rawSheetData, searchKeluar, katKeluar]);
-
-  // Reusable List Component
-  const ArsipCard = ({ r }) => (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-3 hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start">
-        <div className="max-w-[75%]">
-          <b className="text-sky-600 block text-sm mb-1">{r[9]}</b>
-          <small className="text-slate-500 block text-xs">
-            {r[2]} | {r[6]} | <span className="text-sky-500 font-bold">{r[5]}</span>
-          </small>
-          <small className="block text-amber-600 text-[10px] mt-1 font-medium bg-amber-50 inline-block px-2 py-0.5 rounded">
-            D: {r[7]} | K: {r[8]} ({r[4]})
-          </small>
-        </div>
-        <div className="flex gap-2">
-          <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-9 h-9 flex items-center justify-center rounded-lg bg-sky-100 text-sky-600 hover:bg-sky-200 transition">
-            <Eye size={18} />
-          </a>
-          <button onClick={() => editData(r[0])} className="w-9 h-9 flex items-center justify-center rounded-lg bg-amber-100 text-amber-600 hover:bg-amber-200 transition">
-            <Pencil size={18} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 pb-28 font-sans selection:bg-sky-200">
-      
-      {/* Toast Notification */}
-      <div className={`fixed top-5 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-sm font-bold z-[9999] transition-all duration-300 ${toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'} ${toast.isError ? 'bg-rose-500 text-white' : 'bg-emerald-500 text-white'}`}>
-        {toast.isError ? <AlertCircle size={18} /> : <CheckCircle size={18} />}
-        {toast.msg}
-      </div>
-
-      {/* Loader */}
-      {isLoading && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center">
-          <div className="w-10 h-10 border-4 border-slate-200 border-t-sky-500 rounded-full animate-spin mb-3"></div>
-          <span className="text-sm font-bold text-sky-600 tracking-wider">MENYINKRONKAN DATA...</span>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="bg-white px-4 py-3 shadow-sm border-b border-slate-200 flex justify-between items-center sticky top-0 z-40">
-        <div className="flex items-center">
-          <img src="https://lh3.googleusercontent.com/d/1k2xBp0kGKwnVMStAwSGcNM023CIyfBxS" alt="Logo" className="w-10 h-10 rounded shadow-sm mr-3" />
-          <div>
-            <h5 className="font-bold text-sky-600 text-lg leading-tight m-0">E-ARSIP PKH</h5>
-            <small className="text-slate-500 text-xs">Kab. Tapin</small>
-          </div>
-        </div>
-        <button onClick={exitApp} className="bg-rose-100 text-rose-600 text-xs font-bold px-4 py-1.5 rounded-full hover:bg-rose-200 transition">
-          EXIT
-        </button>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="p-4 max-w-2xl mx-auto">
+      const handleSimpan = async (e) => {
+        e.preventDefault();
         
-        {/* VIEW: DASHBOARD */}
-        <div className={activeTab === 'dash' ? 'block' : 'hidden'}>
-          <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4 mt-2">Statistik Surat</h6>
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <div onClick={() => setActiveTab('masuk')} className="bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl p-4 text-center shadow-sm cursor-pointer hover:shadow-md transition text-white">
-              <div className="text-xs font-medium opacity-80 mb-1">SURAT MASUK</div>
-              <div className="text-3xl font-extrabold">{stats.masuk}</div>
-            </div>
-            <div onClick={() => setActiveTab('keluar')} className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-center shadow-sm cursor-pointer hover:shadow-md transition text-white">
-              <div className="text-xs font-medium opacity-80 mb-1">SURAT KELUAR</div>
-              <div className="text-3xl font-extrabold">{stats.keluar}</div>
-            </div>
-          </div>
-
-          <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4">Kategori Arsip</h6>
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            {Object.keys(stats.kategori).map((k) => (
-              <div key={k} onClick={() => gotoKat(k)} className="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-sm cursor-pointer hover:border-sky-300 transition flex flex-col justify-center h-full">
-                <b className="text-sky-600 block text-xl">{stats.kategori[k]}</b>
-                <small className="text-[10px] text-slate-500 font-bold uppercase mt-1 leading-tight">{k}</small>
-              </div>
-            ))}
-          </div>
-
-          {/* Fitur Drive Khusus */}
-          <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4">File Dari Drive Folder</h6>
-          <div className="mb-3">
-            <input 
-              type="text" 
-              className="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent shadow-sm" 
-              placeholder="Cari nama file di drive..." 
-              value={searchDrive}
-              onChange={(e) => setSearchDrive(e.target.value)}
-            />
-          </div>
-          <div className="max-h-[250px] overflow-y-auto pr-1 mb-6 space-y-2 custom-scrollbar">
-            {filteredDriveFiles.length === 0 ? (
-              <div className="text-center text-slate-400 py-4 text-sm bg-white rounded-xl border border-dashed border-slate-300">Tidak ada file ditemukan</div>
-            ) : (
-              filteredDriveFiles.map((f, i) => (
-                <div key={i} className="bg-white p-3 rounded-lg border-l-4 border-l-amber-500 border border-y-slate-200 border-r-slate-200 shadow-sm flex justify-between items-center">
-                  <div className="max-w-[80%]">
-                    <small className="text-slate-500 text-[10px] font-medium flex items-center gap-1 mb-1">
-                      <Cloud size={12} className="text-amber-500" /> {f.date}
-                    </small>
-                    <div className="text-sm font-bold text-slate-700 truncate">{f.name}</div>
-                  </div>
-                  <a href={f.url} target="_blank" rel="noreferrer" className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-200 text-slate-600 rounded-md hover:bg-slate-100 transition">
-                    <ExternalLink size={16} />
-                  </a>
-                </div>
-              ))
-            )}
-          </div>
-
-          <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4">Arsip Terbaru</h6>
-          <div className="space-y-2">
-            {recentFiles.map((r, i) => (
-              <div key={i} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex justify-between items-center">
-                <div className="max-w-[80%]">
-                  <small className="text-sky-500 text-[10px] font-bold block mb-0.5">{r[2]}</small>
-                  <div className="text-sm text-slate-700 font-medium truncate">{r[9]}</div>
-                </div>
-                <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-8 h-8 flex items-center justify-center bg-sky-50 text-sky-600 rounded hover:bg-sky-100 transition">
-                  <Eye size={16} />
-                </a>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center text-[10px] text-slate-400 mt-10 pb-4 border-t border-dashed border-slate-300 pt-4">
-            Developer by <b className="text-slate-500">M. Zaen Syachrullah V2.2026</b>
-          </div>
-        </div>
-
-        {/* VIEW: SURAT MASUK */}
-        <div className={activeTab === 'masuk' ? 'block' : 'hidden'}>
-          <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4 mt-2">Daftar Surat Masuk</h6>
-          <div className="flex gap-2 mb-4">
-            <input 
-              type="text" 
-              className="flex-1 bg-white border border-slate-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500" 
-              placeholder="Cari surat..." 
-              value={searchMasuk}
-              onChange={(e) => setSearchMasuk(e.target.value)}
-            />
-            <select 
-              className="w-[120px] bg-white border border-slate-300 text-sm rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
-              value={katMasuk}
-              onChange={(e) => setKatMasuk(e.target.value)}
-            >
-              <option value="">Semua Kategori</option>
-              {Object.keys(stats.kategori).map(k => <option key={k} value={k}>{k}</option>)}
-            </select>
-          </div>
-          <div>
-            {listMasuk.length > 0 ? listMasuk.map(r => <ArsipCard key={r[0]} r={r} />) : <div className="text-center text-slate-400 py-8 text-sm">Data tidak ditemukan</div>}
-          </div>
-        </div>
-
-        {/* VIEW: SURAT KELUAR */}
-        <div className={activeTab === 'keluar' ? 'block' : 'hidden'}>
-          <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4 mt-2">Daftar Surat Keluar</h6>
-          <div className="flex gap-2 mb-4">
-            <input 
-              type="text" 
-              className="flex-1 bg-white border border-slate-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500" 
-              placeholder="Cari surat..." 
-              value={searchKeluar}
-              onChange={(e) => setSearchKeluar(e.target.value)}
-            />
-            <select 
-              className="w-[120px] bg-white border border-slate-300 text-sm rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
-              value={katKeluar}
-              onChange={(e) => setKatKeluar(e.target.value)}
-            >
-              <option value="">Semua Kategori</option>
-              {Object.keys(stats.kategori).map(k => <option key={k} value={k}>{k}</option>)}
-            </select>
-          </div>
-          <div>
-            {listKeluar.length > 0 ? listKeluar.map(r => <ArsipCard key={r[0]} r={r} />) : <div className="text-center text-slate-400 py-8 text-sm">Data tidak ditemukan</div>}
-          </div>
-        </div>
-
-      </div>
-
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-end pb-3 pt-2 px-2 z-[100] shadow-[0_-5px_15px_-3px_rgba(0,0,0,0.05)]">
-        <button onClick={() => setActiveTab('dash')} className={`flex flex-col items-center flex-1 gap-1 ${activeTab === 'dash' ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600'}`}>
-          <LayoutGrid size={22} className={activeTab === 'dash' ? 'fill-sky-100' : ''} />
-          <span className="text-[9px] font-bold tracking-wider">DASHBOARD</span>
-        </button>
-        <button onClick={() => setActiveTab('masuk')} className={`flex flex-col items-center flex-1 gap-1 ${activeTab === 'masuk' ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600'}`}>
-          <Inbox size={22} className={activeTab === 'masuk' ? 'fill-sky-100' : ''} />
-          <span className="text-[9px] font-bold tracking-wider">MASUK</span>
-        </button>
+        // Memperbaiki error Babel Standalone dengan menghapus optional chaining (?.)
+        const fl = fileInputRef.current ? fileInputRef.current.files[0] : null;
         
-        <div className="relative -top-6">
-          <button onClick={openModalForAdd} className="w-14 h-14 bg-sky-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-sky-500/40 border-4 border-slate-50 hover:bg-sky-600 transition hover:scale-105 active:scale-95">
-            <PlusCircle size={32} />
-          </button>
-        </div>
+        if (fl && fl.size > 3 * 1024 * 1024) {
+          showToast("Ukuran file maksimal 3MB!", true);
+          return;
+        }
 
-        <button onClick={() => setActiveTab('keluar')} className={`flex flex-col items-center flex-1 gap-1 ${activeTab === 'keluar' ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600'}`}>
-          <Send size={22} className={activeTab === 'keluar' ? 'fill-sky-100' : ''} />
-          <span className="text-[9px] font-bold tracking-wider">KELUAR</span>
-        </button>
-        <button onClick={muatData} className="flex flex-col items-center flex-1 gap-1 text-slate-400 hover:text-sky-600 transition">
-          <RefreshCcw size={22} />
-          <span className="text-[9px] font-bold tracking-wider">REFRESH</span>
-        </button>
-      </div>
-
-      {/* Modal Form */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[1001] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm p-0 sm:p-4">
-          <div className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:fade-in-0 duration-200">
+        setIsLoading(true);
+        
+        const sendData = async (objData) => {
+          try {
+            const response = await fetch(API_URL, {
+              method: 'POST',
+              body: JSON.stringify(objData),
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+            });
+            const data = await response.json();
             
-            <div className="flex justify-between items-center p-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl">
-              <h6 className="font-bold text-sky-600 uppercase m-0 flex items-center gap-2">
-                <Pencil size={18} /> Form Data Arsip
-              </h6>
-              <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-1 rounded-full transition">
-                <X size={24} />
+            if (data.status === 'success') {
+              showToast(data.message);
+              setIsModalOpen(false);
+              muatData();
+            } else {
+              showToast("Gagal: " + data.message, true);
+            }
+          } catch (err) {
+            showToast("Terjadi kesalahan jaringan.", true);
+          } finally {
+            setIsLoading(false);
+          }
+        };
+
+        if (fl) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const payload = {
+              ...formData,
+              fileData: ev.target.result.split(',')[1],
+              mimeType: fl.type,
+              fileName: fl.name
+            };
+            sendData(payload);
+          };
+          reader.readAsDataURL(fl);
+        } else {
+          sendData(formData);
+        }
+      };
+
+      const gotoKat = (k) => {
+        const s = rawSheetData.find(r => r[5] === k);
+        const v = (s && s[3].toLowerCase().includes('keluar')) ? 'keluar' : 'masuk';
+        setActiveTab(v);
+        if (v === 'keluar') setKatKeluar(k);
+        else setKatMasuk(k);
+      };
+
+      const exitApp = () => {
+        if (window.confirm("Keluar dari aplikasi?")) {
+          window.location.href = "https://google.com";
+        }
+      };
+
+      const filteredDriveFiles = useMemo(() => {
+        return rawDriveData.filter(f => f.name.toLowerCase().includes(searchDrive.toLowerCase()));
+      }, [rawDriveData, searchDrive]);
+
+      const recentFiles = useMemo(() => rawSheetData.slice(0, 5), [rawSheetData]);
+
+      const getFilteredList = (tipe, searchQ, katQ) => {
+        let f = rawSheetData.filter(r => (r[3] || '').toLowerCase().includes(tipe));
+        if (searchQ) {
+          f = f.filter(r => (r[9] || '').toLowerCase().includes(searchQ.toLowerCase()) || (r[6] || '').toLowerCase().includes(searchQ.toLowerCase()));
+        }
+        if (katQ) {
+          f = f.filter(r => r[5] === katQ);
+        }
+        return f;
+      };
+
+      const listMasuk = useMemo(() => getFilteredList('masuk', searchMasuk, katMasuk), [rawSheetData, searchMasuk, katMasuk]);
+      const listKeluar = useMemo(() => getFilteredList('keluar', searchKeluar, katKeluar), [rawSheetData, searchKeluar, katKeluar]);
+
+      const ArsipCard = ({ r }) => (
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-3 hover:shadow-md transition-shadow">
+          <div className="flex justify-between items-start">
+            <div className="max-w-[75%]">
+              <b className="text-sky-600 block text-sm mb-1">{r[9]}</b>
+              <small className="text-slate-500 block text-xs">
+                {r[2]} | {r[6]} | <span className="text-sky-500 font-bold">{r[5]}</span>
+              </small>
+              <small className="block text-amber-600 text-[10px] mt-1 font-medium bg-amber-50 inline-block px-2 py-0.5 rounded">
+                D: {r[7]} | K: {r[8]} ({r[4]})
+              </small>
+            </div>
+            <div className="flex gap-2">
+              <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-9 h-9 flex items-center justify-center rounded-lg bg-sky-100 text-sky-600 hover:bg-sky-200 transition">
+                <i className="bi bi-eye-fill"></i>
+              </a>
+              <button onClick={() => editData(r[0])} className="w-9 h-9 flex items-center justify-center rounded-lg bg-amber-100 text-amber-600 hover:bg-amber-200 transition">
+                <i className="bi bi-pencil-square"></i>
               </button>
             </div>
+          </div>
+        </div>
+      );
 
-            <div className="overflow-y-auto p-4 custom-scrollbar">
-              <form id="fArsip" onSubmit={handleSimpan} className="grid grid-cols-2 gap-4">
-                <div className="col-span-1">
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">TGL SURAT</label>
-                  <input type="date" name="tglSurat" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none" value={formData.tglSurat} onChange={handleInputChange} />
+      return (
+        <div className="min-h-screen pb-28 font-sans">
+          
+          {/* Toast Notification */}
+          <div className={`fixed top-5 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-sm font-bold z-[9999] transition-all duration-300 ${toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'} ${toast.isError ? 'bg-rose-500 text-white' : 'bg-emerald-500 text-white'}`}>
+            <i className={`bi ${toast.isError ? 'bi-exclamation-circle-fill' : 'bi-check-circle-fill'} text-lg`}></i>
+            {toast.msg}
+          </div>
+
+          {/* Loader */}
+          {isLoading && (
+            <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center">
+              <div className="w-10 h-10 border-4 border-slate-200 border-t-sky-500 rounded-full animate-spin mb-3"></div>
+              <span className="text-sm font-bold text-sky-600 tracking-wider">MENYINKRONKAN DATA...</span>
+            </div>
+          )}
+
+          {/* Header */}
+          <div className="bg-white px-4 py-3 shadow-sm border-b border-slate-200 flex justify-between items-center sticky top-0 z-40">
+            <div className="flex items-center">
+              <img src="https://lh3.googleusercontent.com/d/1k2xBp0kGKwnVMStAwSGcNM023CIyfBxS" alt="Logo" className="w-10 h-10 rounded shadow-sm mr-3" />
+              <div>
+                <h5 className="font-bold text-sky-600 text-lg leading-tight m-0">E-ARSIP PKH</h5>
+                <small className="text-slate-500 text-xs">Kab. Tapin</small>
+              </div>
+            </div>
+            <button onClick={exitApp} className="bg-rose-100 text-rose-600 text-xs font-bold px-4 py-1.5 rounded-full hover:bg-rose-200 transition">
+              EXIT
+            </button>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="p-4 max-w-2xl mx-auto">
+            
+            {/* VIEW: DASHBOARD */}
+            <div className={activeTab === 'dash' ? 'block' : 'hidden'}>
+              <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4 mt-2">Statistik Surat</h6>
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <div onClick={() => setActiveTab('masuk')} className="bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl p-4 text-center shadow-sm cursor-pointer hover:shadow-md transition text-white">
+                  <div className="text-xs font-medium opacity-80 mb-1">SURAT MASUK</div>
+                  <div className="text-3xl font-extrabold">{stats.masuk}</div>
                 </div>
-                <div className="col-span-1">
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">JENIS</label>
-                  <select name="jenis" className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none" value={formData.jenis} onChange={handleInputChange}>
-                    <option>Surat Masuk</option>
-                    <option>Surat Keluar</option>
-                  </select>
+                <div onClick={() => setActiveTab('keluar')} className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-center shadow-sm cursor-pointer hover:shadow-md transition text-white">
+                  <div className="text-xs font-medium opacity-80 mb-1">SURAT KELUAR</div>
+                  <div className="text-3xl font-extrabold">{stats.keluar}</div>
                 </div>
-                <div className="col-span-1">
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">KATEGORI</label>
-                  <select name="kategori" className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none" value={formData.kategori} onChange={handleInputChange}>
-                    <option>Pemberitahuan</option><option>Laporan</option><option>SK</option>
-                    <option>Nota Dinas</option><option>File</option><option>Lainnya</option>
-                  </select>
-                </div>
-                <div className="col-span-1">
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">SIFAT</label>
-                  <select name="sifat" className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none" value={formData.sifat} onChange={handleInputChange}>
-                    <option>Biasa</option><option>Penting</option><option>Rahasia</option>
-                  </select>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">NOMOR SURAT</label>
-                  <input type="text" name="noSurat" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none" value={formData.noSurat} onChange={handleInputChange} />
-                </div>
-                <div className="col-span-1">
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">PENGIRIM</label>
-                  <input type="text" name="pengirim" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none" value={formData.pengirim} onChange={handleInputChange} />
-                </div>
-                <div className="col-span-1">
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">PENERIMA</label>
-                  <input type="text" name="penerima" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none" value={formData.penerima} onChange={handleInputChange} />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">PERIHAL SURAT</label>
-                  <textarea name="perihal" rows="2" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none" value={formData.perihal} onChange={handleInputChange}></textarea>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">PETUGAS</label>
-                  <input type="text" name="namaPenginput" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none" value={formData.namaPenginput} onChange={handleInputChange} />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">FILE SCAN (Max 3MB)</label>
-                  <input type="file" ref={fileInputRef} className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100" accept="image/*,application/pdf" />
-                </div>
-              </form>
+              </div>
+
+              <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4">Kategori Arsip</h6>
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                {Object.keys(stats.kategori).map((k) => (
+                  <div key={k} onClick={() => gotoKat(k)} className="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-sm cursor-pointer hover:border-sky-300 transition flex flex-col justify-center h-full">
+                    <b className="text-sky-600 block text-xl">{stats.kategori[k]}</b>
+                    <small className="text-[10px] text-slate-500 font-bold uppercase mt-1 leading-tight">{k}</small>
+                  </div>
+                ))}
+              </div>
+
+              <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4">File Dari Drive Folder</h6>
+              <div className="mb-3">
+                <input 
+                  type="text" 
+                  className="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm" 
+                  placeholder="Cari nama file di drive..." 
+                  value={searchDrive}
+                  onChange={(e) => setSearchDrive(e.target.value)}
+                />
+              </div>
+              <div className="max-h-[250px] overflow-y-auto pr-1 mb-6 space-y-2 custom-scrollbar">
+                {filteredDriveFiles.length === 0 ? (
+                  <div className="text-center text-slate-400 py-4 text-sm bg-white rounded-xl border border-dashed border-slate-300">Tidak ada file ditemukan</div>
+                ) : (
+                  filteredDriveFiles.map((f, i) => (
+                    <div key={i} className="bg-white p-3 rounded-lg border-l-4 border-l-amber-500 border border-y-slate-200 border-r-slate-200 shadow-sm flex justify-between items-center">
+                      <div className="max-w-[80%]">
+                        <small className="text-slate-500 text-[10px] font-medium flex items-center gap-1 mb-1">
+                          <i className="bi bi-cloud-check-fill text-amber-500"></i> {f.date}
+                        </small>
+                        <div className="text-sm font-bold text-slate-700 truncate">{f.name}</div>
+                      </div>
+                      <a href={f.url} target="_blank" rel="noreferrer" className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-200 text-slate-600 rounded-md hover:bg-slate-100 transition">
+                        <i className="bi bi-box-arrow-up-right"></i>
+                      </a>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4">Arsip Terbaru</h6>
+              <div className="space-y-2">
+                {recentFiles.map((r, i) => (
+                  <div key={i} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex justify-between items-center">
+                    <div className="max-w-[80%]">
+                      <small className="text-sky-500 text-[10px] font-bold block mb-0.5">{r[2]}</small>
+                      <div className="text-sm text-slate-700 font-medium truncate">{r[9]}</div>
+                    </div>
+                    <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-8 h-8 flex items-center justify-center bg-sky-50 text-sky-600 rounded hover:bg-sky-100 transition">
+                      <i className="bi bi-eye-fill"></i>
+                    </a>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center text-[10px] text-slate-400 mt-10 pb-4 border-t border-dashed border-slate-300 pt-4">
+                Developer by <b className="text-slate-500">M. Zaen Syachrullah V2.2026</b>
+              </div>
             </div>
 
-            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-center sm:rounded-b-2xl pb-6 sm:pb-4">
-              <button 
-                type="submit" 
-                form="fArsip" 
-                className="flex flex-col items-center justify-center text-rose-500 hover:text-rose-600 transition group"
-              >
-                <HeartPulse size={48} strokeWidth={1.5} className="animate-[pulse_1.2s_infinite] group-hover:scale-110 transition-transform" />
-                <small className="font-bold tracking-widest mt-2 text-xs text-slate-700 group-hover:text-rose-500 transition-colors">TAP UNTUK SIMPAN</small>
-              </button>
+            {/* VIEW: SURAT MASUK */}
+            <div className={activeTab === 'masuk' ? 'block' : 'hidden'}>
+              <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4 mt-2">Daftar Surat Masuk</h6>
+              <div className="flex gap-2 mb-4">
+                <input type="text" className="flex-1 bg-white border border-slate-300 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500" placeholder="Cari surat..." value={searchMasuk} onChange={(e) => setSearchMasuk(e.target.value)} />
+                <select className="w-[120px] bg-white border border-slate-300 text-sm rounded-lg px-2 py-2 focus:ring-2 focus:ring-sky-500" value={katMasuk} onChange={(e) => setKatMasuk(e.target.value)}>
+                  <option value="">Semua Kategori</option>
+                  {Object.keys(stats.kategori).map(k => <option key={k} value={k}>{k}</option>)}
+                </select>
+              </div>
+              <div>{listMasuk.length > 0 ? listMasuk.map(r => <ArsipCard key={r[0]} r={r} />) : <div className="text-center text-slate-400 py-8 text-sm">Data tidak ditemukan</div>}</div>
+            </div>
+
+            {/* VIEW: SURAT KELUAR */}
+            <div className={activeTab === 'keluar' ? 'block' : 'hidden'}>
+              <h6 className="text-sm font-bold text-sky-500 uppercase tracking-wider border-l-4 border-sky-500 pl-2 mb-4 mt-2">Daftar Surat Keluar</h6>
+              <div className="flex gap-2 mb-4">
+                <input type="text" className="flex-1 bg-white border border-slate-300 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500" placeholder="Cari surat..." value={searchKeluar} onChange={(e) => setSearchKeluar(e.target.value)} />
+                <select className="w-[120px] bg-white border border-slate-300 text-sm rounded-lg px-2 py-2 focus:ring-2 focus:ring-sky-500" value={katKeluar} onChange={(e) => setKatKeluar(e.target.value)}>
+                  <option value="">Semua Kategori</option>
+                  {Object.keys(stats.kategori).map(k => <option key={k} value={k}>{k}</option>)}
+                </select>
+              </div>
+              <div>{listKeluar.length > 0 ? listKeluar.map(r => <ArsipCard key={r[0]} r={r} />) : <div className="text-center text-slate-400 py-8 text-sm">Data tidak ditemukan</div>}</div>
             </div>
 
           </div>
-        </div>
-      )}
 
-      {/* Global CSS Inject untuk Scrollbar custom agar UI lebih rapi */}
-      <style dangerouslySetInnerHTML={{__html: `
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-      `}} />
-    </div>
-  );
-}
+          {/* Bottom Navigation */}
+          <div className="fixed bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-end pb-3 pt-2 px-2 z-[100] shadow-[0_-5px_15px_-3px_rgba(0,0,0,0.05)]">
+            <button onClick={() => setActiveTab('dash')} className={`flex flex-col items-center flex-1 gap-1 ${activeTab === 'dash' ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600'}`}>
+              <i className="bi bi-grid-1x2-fill text-2xl"></i>
+              <span className="text-[9px] font-bold tracking-wider">DASHBOARD</span>
+            </button>
+            <button onClick={() => setActiveTab('masuk')} className={`flex flex-col items-center flex-1 gap-1 ${activeTab === 'masuk' ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600'}`}>
+              <i className="bi bi-box-arrow-in-down text-2xl"></i>
+              <span className="text-[9px] font-bold tracking-wider">MASUK</span>
+            </button>
+            
+            <div className="relative -top-6">
+              <button onClick={openModalForAdd} className="w-14 h-14 bg-sky-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-sky-500/40 border-4 border-slate-50 hover:bg-sky-600 transition hover:scale-105 active:scale-95">
+                <i className="bi bi-plus-circle-fill text-3xl"></i>
+              </button>
+            </div>
+
+            <button onClick={() => setActiveTab('keluar')} className={`flex flex-col items-center flex-1 gap-1 ${activeTab === 'keluar' ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600'}`}>
+              <i className="bi bi-box-arrow-up text-2xl"></i>
+              <span className="text-[9px] font-bold tracking-wider">KELUAR</span>
+            </button>
+            <button onClick={muatData} className="flex flex-col items-center flex-1 gap-1 text-slate-400 hover:text-sky-600 transition">
+              <i className="bi bi-arrow-clockwise text-2xl"></i>
+              <span className="text-[9px] font-bold tracking-wider">REFRESH</span>
+            </button>
+          </div>
+
+          {/* Modal Form */}
+          {isModalOpen && (
+            <div className="fixed inset-0 z-[1001] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm p-0 sm:p-4">
+              <div className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:fade-in-0 duration-200">
+                
+                <div className="flex justify-between items-center p-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl">
+                  <h6 className="font-bold text-sky-600 uppercase m-0 flex items-center gap-2">
+                    <i className="bi bi-pencil-square"></i> Form Data Arsip
+                  </h6>
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-1 rounded-full transition">
+                    <i className="bi bi-x-lg"></i>
+                  </button>
+                </div>
+
+                <div className="overflow-y-auto p-4 custom-scrollbar">
+                  <form id="fArsip" onSubmit={handleSimpan} className="grid grid-cols-2 gap-4">
+                    <div className="col-span-1">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">TGL SURAT</label>
+                      <input type="date" name="tglSurat" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 outline-none" value={formData.tglSurat} onChange={handleInputChange} />
+                    </div>
+                    <div className="col-span-1">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">JENIS</label>
+                      <select name="jenis" className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 outline-none" value={formData.jenis} onChange={handleInputChange}>
+                        <option>Surat Masuk</option><option>Surat Keluar</option>
+                      </select>
+                    </div>
+                    <div className="col-span-1">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">KATEGORI</label>
+                      <select name="kategori" className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 outline-none" value={formData.kategori} onChange={handleInputChange}>
+                        <option>Pemberitahuan</option><option>Laporan</option><option>SK</option>
+                        <option>Nota Dinas</option><option>File</option><option>Lainnya</option>
+                      </select>
+                    </div>
+                    <div className="col-span-1">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">SIFAT</label>
+                      <select name="sifat" className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 outline-none" value={formData.sifat} onChange={handleInputChange}>
+                        <option>Biasa</option><option>Penting</option><option>Rahasia</option>
+                      </select>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">NOMOR SURAT</label>
+                      <input type="text" name="noSurat" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 outline-none" value={formData.noSurat} onChange={handleInputChange} />
+                    </div>
+                    <div className="col-span-1">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">PENGIRIM</label>
+                      <input type="text" name="pengirim" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 outline-none" value={formData.pengirim} onChange={handleInputChange} />
+                    </div>
+                    <div className="col-span-1">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">PENERIMA</label>
+                      <input type="text" name="penerima" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 outline-none" value={formData.penerima} onChange={handleInputChange} />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">PERIHAL SURAT</label>
+                      <textarea name="perihal" rows="2" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 outline-none" value={formData.perihal} onChange={handleInputChange}></textarea>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">PETUGAS</label>
+                      <input type="text" name="namaPenginput" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 outline-none" value={formData.namaPenginput} onChange={handleInputChange} />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">FILE SCAN (Max 3MB)</label>
+                      <input type="file" ref={fileInputRef} className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 outline-none file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100" accept="image/*,application/pdf" />
+                    </div>
+                  </form>
+                </div>
+
+                <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-center sm:rounded-b-2xl pb-6 sm:pb-4">
+                  <button type="submit" form="fArsip" className="flex flex-col items-center justify-center text-rose-500 hover:text-rose-600 transition group">
+                    <i className="bi bi-heart-pulse-fill text-5xl animate-[pulse_1.2s_infinite] group-hover:scale-110 transition-transform"></i>
+                    <small className="font-bold tracking-widest mt-2 text-xs text-slate-700 group-hover:text-rose-500 transition-colors">TAP UNTUK SIMPAN</small>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
