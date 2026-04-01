@@ -63,7 +63,7 @@
     // =====================================================================
     // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
     // PENTING: Pastikan URL berakhiran /exec
-    const API_URL = "https://script.google.com/macros/s/AKfycbzhBMqYNXsYvpNqapkuSzZuao8HL5YlOclTZ2pv481-Tv8uwuXFLjB7J1AvgcLtvcDG/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzHbBEpls4DVc-6hv4hp7y7qqEIpLZ-pnF4v7yCUaChCOP9A1IS3p-q6b8Hzx2sfE-Z/exec"; 
     // =====================================================================
 
     const getCategoryIconInfo = (kategori) => {
@@ -83,6 +83,7 @@
       useEffect(() => localStorage.setItem('eArsipActiveTab', activeTab), [activeTab]);
 
       const [isLoading, setIsLoading] = useState(false);
+      const [loadingText, setLoadingText] = useState("SINKRONISASI...");
       const [toast, setToast] = useState({ show: false, msg: '', isError: false });
       const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -111,6 +112,7 @@
       };
 
       const muatData = async () => {
+        setLoadingText("SINKRONISASI...");
         setIsLoading(true);
         try {
           const response = await fetch(API_URL + "?action=getData", { redirect: 'follow' });
@@ -166,6 +168,7 @@
           showToast("Ukuran file maksimal 3MB!", true); return;
         }
 
+        setLoadingText("MENYIMPAN DATA...");
         setIsLoading(true);
         const sendData = async (objData) => {
           try {
@@ -294,7 +297,7 @@
             <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center">
               <div className="bg-white p-8 rounded-[2rem] shadow-2xl flex flex-col items-center btn-3d shadow-3d">
                 <div className="w-16 h-16 border-8 border-slate-100 border-t-brand-500 rounded-full animate-spin mb-4"></div>
-                <span className="text-sm font-extrabold text-slate-800 tracking-widest animate-pulse">SINKRONISASI...</span>
+                <span className="text-sm font-extrabold text-slate-800 tracking-widest animate-pulse">{loadingText}</span>
               </div>
             </div>
           )}
@@ -481,7 +484,6 @@
                 <div className="overflow-y-auto px-8 py-6 custom-scrollbar">
                   <form id="fArsip" onSubmit={handleSimpan} className="grid grid-cols-2 gap-x-5 gap-y-6">
                     
-                    {/* FITUR BARU: FORM JUDUL SURAT (Menempati 2 Kolom Penuh) */}
                     <div className="col-span-2">
                       <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Judul Surat</label>
                       <input type="text" name="judulSurat" required placeholder="Judul / Nama Surat..." className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all" value={formData.judulSurat} onChange={handleInputChange} />
@@ -539,7 +541,6 @@
                     <div className="col-span-2">
                       <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Upload File (Semua Format - Maks 3MB)</label>
                       <div className="relative overflow-hidden">
-                        {/* FITUR UPLOAD BEBAS FORMAT */}
                         <input type="file" ref={fileInputRef} className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-3 py-3 focus:border-brand-500 focus:bg-white outline-none file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-brand-100 file:text-brand-600 hover:file:bg-brand-200 cursor-pointer" />
                       </div>
                     </div>
