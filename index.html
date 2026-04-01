@@ -62,7 +62,15 @@
 </head>
 <body class="bg-slate-50 text-slate-800 selection:bg-brand-100">
 
-  <div id="root"></div>
+  <!-- Loader Awal Bawaan (Untuk Mempercepat Tampilan Awal Sebelum React Aktif) -->
+  <div id="root">
+    <div class="fixed inset-0 bg-slate-50 z-[9999] flex flex-col items-center justify-center">
+      <div class="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center">
+        <div class="w-12 h-12 border-4 border-slate-100 border-t-brand-500 rounded-full animate-spin mb-4"></div>
+        <span class="text-sm font-extrabold text-slate-800 tracking-wider animate-pulse">MEMUAT APLIKASI...</span>
+      </div>
+    </div>
+  </div>
 
   <script type="text/babel">
     const { useState, useEffect, useRef, useMemo } = React;
@@ -86,7 +94,16 @@
     };
 
     function App() {
-      const [activeTab, setActiveTab] = useState('dash');
+      // 1. FITUR BARU: Mengingat tab saat direfresh
+      const [activeTab, setActiveTab] = useState(() => {
+        return localStorage.getItem('eArsipActiveTab') || 'dash';
+      });
+
+      // Simpan perubahan tab ke localStorage
+      useEffect(() => {
+        localStorage.setItem('eArsipActiveTab', activeTab);
+      }, [activeTab]);
+
       const [isLoading, setIsLoading] = useState(false);
       const [toast, setToast] = useState({ show: false, msg: '', isError: false });
       const [isModalOpen, setIsModalOpen] = useState(false);
@@ -272,27 +289,28 @@
             <div className={`absolute left-0 top-0 bottom-0 w-1 ${catInfo.bg}`}></div>
             
             <div className="flex justify-between items-start pl-2">
-              <div className="max-w-[75%]">
-                <div className="flex items-center gap-2 mb-1.5">
+              <div className="max-w-[75%] pr-2">
+                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${catInfo.bg} ${catInfo.color}`}>
                     {r[5]}
                   </span>
                   <small className="text-slate-400 text-[10px] font-semibold">{r[2]}</small>
                 </div>
-                <b className="text-slate-800 block text-sm mb-1 leading-snug group-hover:text-brand-600 transition-colors">{r[9]}</b>
+                {/* 2. FITUR BARU: line-clamp-2 mencegah teks panjang terpotong langsung, memungkinkannya 2 baris */}
+                <b className="text-slate-800 block text-sm mb-2 leading-snug group-hover:text-brand-600 transition-colors line-clamp-2 break-words">{r[9]}</b>
                 <small className="text-slate-500 block text-xs font-medium mb-2">No: {r[6]}</small>
                 
-                <div className="flex gap-2">
-                  <small className="flex items-center gap-1 text-emerald-600 text-[10px] font-semibold bg-emerald-50 px-2 py-1 rounded-md">
-                    <i className="bi bi-person-down"></i> {r[7]}
+                <div className="flex gap-2 flex-wrap">
+                  <small className="flex items-center gap-1 text-emerald-600 text-[10px] font-semibold bg-emerald-50 px-2 py-1 rounded-md line-clamp-1">
+                    <i className="bi bi-person-down flex-shrink-0"></i> {r[7]}
                   </small>
-                  <small className="flex items-center gap-1 text-indigo-600 text-[10px] font-semibold bg-indigo-50 px-2 py-1 rounded-md">
-                    <i className="bi bi-person-up"></i> {r[8]}
+                  <small className="flex items-center gap-1 text-indigo-600 text-[10px] font-semibold bg-indigo-50 px-2 py-1 rounded-md line-clamp-1">
+                    <i className="bi bi-person-up flex-shrink-0"></i> {r[8]}
                   </small>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 flex-shrink-0">
                 <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-brand-50 hover:text-brand-600 transition shadow-sm border border-slate-100">
                   <i className="bi bi-eye-fill text-lg"></i>
                 </a>
@@ -348,14 +366,12 @@
               
               <SectionTitle icon="bi-bar-chart-line-fill" title="Statistik Surat" />
               <div className="grid grid-cols-2 gap-4 mb-2">
-                {/* 3D Button Card Masuk */}
                 <div onClick={() => setActiveTab('masuk')} className="btn-3d cursor-pointer bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-3xl p-5 text-white shadow-[0_6px_0_#059669] relative overflow-hidden">
                   <i className="bi bi-box-arrow-in-down absolute -right-4 -bottom-4 text-7xl opacity-20"></i>
                   <div className="text-xs font-bold opacity-90 mb-1 tracking-wider">SURAT MASUK</div>
                   <div className="text-4xl font-black">{stats.masuk}</div>
                 </div>
                 
-                {/* 3D Button Card Keluar */}
                 <div onClick={() => setActiveTab('keluar')} className="btn-3d cursor-pointer bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-3xl p-5 text-white shadow-[0_6px_0_#4338ca] relative overflow-hidden">
                   <i className="bi bi-box-arrow-up absolute -right-4 -bottom-4 text-7xl opacity-20"></i>
                   <div className="text-xs font-bold opacity-90 mb-1 tracking-wider">SURAT KELUAR</div>
@@ -369,12 +385,13 @@
                   const catInfo = getCategoryIconInfo(k);
                   return (
                     <div key={k} onClick={() => gotoKat(k)} className="bg-white rounded-2xl p-4 text-center shadow-sm border border-slate-100 cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-center items-center gap-2">
-                      <div className={`w-10 h-10 rounded-full ${catInfo.bg} ${catInfo.color} flex items-center justify-center`}>
+                      <div className={`w-10 h-10 rounded-full ${catInfo.bg} ${catInfo.color} flex items-center justify-center flex-shrink-0`}>
                         <i className={`bi ${catInfo.icon} text-lg`}></i>
                       </div>
-                      <div>
+                      <div className="w-full">
                         <b className="text-slate-800 block text-lg leading-none">{stats.kategori[k]}</b>
-                        <small className="text-[9px] text-slate-400 font-bold uppercase mt-1 block truncate max-w-[80px] mx-auto">{k}</small>
+                        {/* 3. FITUR BARU: Mengubah truncate agar tidak memotong tulisan penting */}
+                        <small className="text-[10px] text-slate-500 font-bold uppercase mt-1 block px-1 text-center leading-tight line-clamp-2">{k}</small>
                       </div>
                     </div>
                   )
@@ -404,22 +421,21 @@
                     <div className="text-center text-slate-400 py-6 text-sm font-medium bg-slate-50 rounded-2xl border border-dashed border-slate-200">Pencarian tidak ditemukan</div>
                   ) : (
                     filteredDriveFiles.map((f, i) => (
-                      <div key={i} className="group bg-white p-3 rounded-2xl border border-slate-100 hover:border-brand-200 hover:shadow-md transition-all flex justify-between items-center">
-                        <div className="flex items-center gap-3 max-w-[80%] overflow-hidden">
+                      <div key={i} className="group bg-white p-3 rounded-2xl border border-slate-100 hover:border-brand-200 hover:shadow-md transition-all flex justify-between items-start sm:items-center flex-col sm:flex-row gap-3">
+                        <div className="flex items-center gap-3 w-full sm:max-w-[80%]">
                           <div className="w-11 h-11 rounded-xl bg-sky-50 text-sky-500 flex flex-shrink-0 items-center justify-center">
                             <i className="bi bi-file-earmark-fill text-xl"></i>
                           </div>
-                          <div className="min-w-0">
-                            {/* Nama file dibuat utuh dan bisa di-truncate jika terlalu panjang */}
-                            <div className="text-sm font-bold text-slate-700 truncate group-hover:text-brand-600 transition-colors" title={f.name}>{f.name}</div>
-                            <small className="text-slate-400 text-[10px] font-semibold flex items-center gap-1 mt-0.5">
+                          <div className="min-w-0 flex-1">
+                            {/* 4. FITUR BARU: line-clamp-2 mencegah teks panjang terpotong langsung, memungkinkannya 2 baris */}
+                            <div className="text-sm font-bold text-slate-700 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug" title={f.name}>{f.name}</div>
+                            <small className="text-slate-400 text-[10px] font-semibold flex items-center gap-1 mt-1">
                               <i className="bi bi-cloud-check-fill text-emerald-500"></i> Diupload: {f.date}
                             </small>
                           </div>
                         </div>
-                        {/* Tombol Download Khusus */}
-                        <a href={f.url} target="_blank" rel="noreferrer" title="Download File" className="w-10 h-10 rounded-full bg-slate-50 text-brand-500 hover:bg-brand-500 hover:text-white flex flex-shrink-0 items-center justify-center transition-colors border border-slate-100 shadow-sm btn-3d">
-                          <i className="bi bi-cloud-download-fill text-lg"></i>
+                        <a href={f.url} target="_blank" rel="noreferrer" title="Download File" className="w-full sm:w-10 h-10 rounded-xl sm:rounded-full bg-brand-50 text-brand-600 sm:bg-slate-50 sm:text-brand-500 hover:bg-brand-500 hover:text-white flex flex-shrink-0 items-center justify-center transition-colors border border-brand-100 sm:border-slate-100 shadow-sm btn-3d">
+                          <i className="bi bi-cloud-download-fill text-lg"></i> <span className="sm:hidden font-bold ml-2 text-sm">Download File</span>
                         </a>
                       </div>
                     ))
@@ -432,9 +448,10 @@
                 {recentFiles.map((r, i) => (
                   <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center hover:shadow-md transition-shadow">
                     <div className="flex items-center gap-3 max-w-[80%]">
-                      <div className="w-2 h-2 rounded-full bg-brand-500"></div>
+                      <div className="w-2 h-2 rounded-full bg-brand-500 flex-shrink-0"></div>
                       <div>
-                        <div className="text-sm text-slate-800 font-bold truncate leading-snug">{r[9]}</div>
+                        {/* 5. FITUR BARU: Mengubah truncate agar judul surat yang panjang tidak terpotong cepat */}
+                        <div className="text-sm text-slate-800 font-bold line-clamp-2 break-words leading-snug">{r[9]}</div>
                         <small className="text-slate-400 text-[10px] font-semibold block mt-1">{r[2]} • {r[6]}</small>
                       </div>
                     </div>
