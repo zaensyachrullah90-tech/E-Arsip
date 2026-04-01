@@ -63,7 +63,7 @@
     // =====================================================================
     // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
     // PENTING: Pastikan URL berakhiran /exec
-    const API_URL = "https://script.google.com/macros/s/AKfycbzQW9_OxIOsX83VlPOCLT_6Fk_faXsNVb_T6InTUvRiLIc2W7st_GQPDjr7F-tVGx-w/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzhBMqYNXsYvpNqapkuSzZuao8HL5YlOclTZ2pv481-Tv8uwuXFLjB7J1AvgcLtvcDG/exec"; 
     // =====================================================================
 
     const getCategoryIconInfo = (kategori) => {
@@ -99,7 +99,7 @@
       const fileInputRef = useRef(null);
       const [formData, setFormData] = useState({
         id: '', existingFileId: '', tglSurat: '', jenis: 'Surat Masuk', 
-        kategori: 'Pemberitahuan', sifat: 'Biasa', noSurat: '', 
+        kategori: 'Pemberitahuan', sifat: 'Biasa', judulSurat: '', noSurat: '', 
         pengirim: '', penerima: '', perihal: '', namaPenginput: ''
       });
 
@@ -144,7 +144,7 @@
       };
 
       const openModalForAdd = () => {
-        setFormData({ id: '', existingFileId: '', tglSurat: '', jenis: 'Surat Masuk', kategori: 'Pemberitahuan', sifat: 'Biasa', noSurat: '', pengirim: '', penerima: '', perihal: '', namaPenginput: '' });
+        setFormData({ id: '', existingFileId: '', tglSurat: '', jenis: 'Surat Masuk', kategori: 'Pemberitahuan', sifat: 'Biasa', judulSurat: '', noSurat: '', pengirim: '', penerima: '', perihal: '', namaPenginput: '' });
         if (fileInputRef.current) fileInputRef.current.value = '';
         setIsModalOpen(true);
       };
@@ -152,7 +152,8 @@
       const editData = (id) => {
         const r = rawSheetData.find(x => x[0] === id);
         if (r) {
-          setFormData({ id: r[0], tglSurat: r[2] ? r[2].split('/').reverse().join('-') : '', jenis: r[3], sifat: r[4], kategori: r[5], noSurat: r[6], pengirim: r[7], penerima: r[8], perihal: r[9], existingFileId: r[10], namaPenginput: r[11] });
+          // r[12] adalah kolom Judul Surat yang baru ditambahkan
+          setFormData({ id: r[0], tglSurat: r[2] ? r[2].split('/').reverse().join('-') : '', jenis: r[3], sifat: r[4], kategori: r[5], noSurat: r[6], pengirim: r[7], penerima: r[8], perihal: r[9], existingFileId: r[10], namaPenginput: r[11], judulSurat: r[12] || '' });
           if (fileInputRef.current) fileInputRef.current.value = '';
           setIsModalOpen(true);
         }
@@ -216,10 +217,10 @@
 
       const recentFiles = useMemo(() => rawSheetData.slice(0, 5), [rawSheetData]);
 
-      // LOGIKA FILTER PERSIS ASLINYA
+      // LOGIKA FILTER PERSIS ASLINYA + Filter Judul
       const getFilteredList = (tipe, searchQ, katQ) => {
         let f = rawSheetData.filter(r => (r[3] || '').toLowerCase().includes(tipe));
-        if (searchQ) f = f.filter(r => (r[9] || '').toLowerCase().includes(searchQ.toLowerCase()) || (r[6] || '').toLowerCase().includes(searchQ.toLowerCase()));
+        if (searchQ) f = f.filter(r => (r[9] || '').toLowerCase().includes(searchQ.toLowerCase()) || (r[6] || '').toLowerCase().includes(searchQ.toLowerCase()) || (r[12] || '').toLowerCase().includes(searchQ.toLowerCase()));
         if (katQ) f = f.filter(r => r[5] === katQ);
         return f;
       };
@@ -238,6 +239,9 @@
 
       const ArsipCard = ({ r }) => {
         const catInfo = getCategoryIconInfo(r[5]);
+        // Tampilkan Judul Surat jika ada (r[12]), jika tidak kembali ke Perihal (r[9])
+        const titleToDisplay = r[12] && r[12].trim() !== '' ? r[12] : r[9]; 
+
         return (
           <div className="bg-white p-5 rounded-[1.5rem] btn-3d shadow-sm border border-slate-200 mb-4 hover:shadow-md relative overflow-hidden group">
             <div className={`absolute left-0 top-0 bottom-0 w-2 ${catInfo.bg}`}></div>
@@ -250,12 +254,12 @@
                   <small className="text-slate-400 text-[10px] font-bold bg-slate-100 px-2 py-1 rounded-lg">{r[2]}</small>
                 </div>
                 
-                <b className="text-slate-800 block text-base font-bold mb-1 leading-snug group-hover:text-brand-600 transition-colors line-clamp-2 break-words">{r[9]}</b>
+                <b className="text-slate-800 block text-base font-bold mb-1 leading-snug group-hover:text-brand-600 transition-colors line-clamp-2 break-words">{titleToDisplay}</b>
                 
-                {/* LOGIKA YANG HILANG DIKEMBALIKAN: MENAMPILKAN NOMOR SURAT DAN SIFAT SURAT (BIASA/PENTING) */}
+                {/* LOGIKA MENAMPILKAN NOMOR SURAT DAN SIFAT SURAT */}
                 <small className="text-slate-500 block text-xs font-semibold mb-3">No: <span className="font-bold text-slate-700">{r[6]}</span> • Sifat: <span className="font-bold text-rose-500">{r[4]}</span></small>
                 
-                {/* LOGIKA YANG HILANG DIKEMBALIKAN: FORMAT D: (DARI) dan K: (KE) */}
+                {/* LOGIKA FORMAT D: (DARI) dan K: (KE) */}
                 <div className="flex gap-2 flex-wrap">
                   <small className="flex items-center gap-1.5 text-emerald-600 text-[10px] font-bold bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-lg line-clamp-1">
                     DARI: <span className="line-clamp-1">{r[7]}</span>
@@ -345,7 +349,6 @@
                 })}
               </div>
 
-              {/* FITUR BACA FILE DRIVE SESUAI PERMINTAAN SEBELUMNYA */}
               <SectionTitle icon="fa-brands fa-google-drive" title="File Google Drive" />
               <div className="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200 mb-4">
                 <div className="relative mb-3 p-2">
@@ -386,20 +389,23 @@
 
               <SectionTitle icon="fa-solid fa-clock-rotate-left" title="Baru Ditambahkan" />
               <div className="space-y-3">
-                {recentFiles.map((r, i) => (
-                  <div key={i} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center hover:shadow-md transition-shadow btn-3d">
-                    <div className="flex items-center gap-3 max-w-[80%]">
-                      <div className="w-3 h-3 rounded-full bg-brand-500 flex-shrink-0 shadow-sm"></div>
-                      <div>
-                        <div className="text-sm text-slate-800 font-extrabold line-clamp-2 break-words leading-snug">{r[9]}</div>
-                        <small className="text-slate-500 text-[10px] font-bold block mt-1"><i className="fa-regular fa-calendar mr-1"></i> {r[2]} • <i className="fa-solid fa-hashtag ml-1 mr-1"></i> {r[6]}</small>
+                {recentFiles.map((r, i) => {
+                  const titleToDisplay = r[12] && r[12].trim() !== '' ? r[12] : r[9]; 
+                  return (
+                    <div key={i} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center hover:shadow-md transition-shadow btn-3d">
+                      <div className="flex items-center gap-3 max-w-[80%]">
+                        <div className="w-3 h-3 rounded-full bg-brand-500 flex-shrink-0 shadow-sm"></div>
+                        <div>
+                          <div className="text-sm text-slate-800 font-extrabold line-clamp-2 break-words leading-snug">{titleToDisplay}</div>
+                          <small className="text-slate-500 text-[10px] font-bold block mt-1"><i className="fa-regular fa-calendar mr-1"></i> {r[2]} • <i className="fa-solid fa-hashtag ml-1 mr-1"></i> {r[6]}</small>
+                        </div>
                       </div>
+                      <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-10 h-10 flex flex-shrink-0 items-center justify-center bg-slate-100 text-brand-500 rounded-[1rem] hover:bg-brand-500 hover:text-white transition border border-slate-200">
+                        <i className="fa-solid fa-eye"></i>
+                      </a>
                     </div>
-                    <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-10 h-10 flex flex-shrink-0 items-center justify-center bg-slate-100 text-brand-500 rounded-[1rem] hover:bg-brand-500 hover:text-white transition border border-slate-200">
-                      <i className="fa-solid fa-eye"></i>
-                    </a>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="text-center text-[10px] text-slate-400 mt-12 pb-4 pt-4 font-extrabold flex items-center justify-center gap-1 uppercase tracking-widest">
                 <i className="fa-solid fa-code"></i> Developer by <b className="text-slate-600">M. Zaen Syachrullah V2.2026</b>
@@ -430,7 +436,6 @@
             ))}
           </div>
 
-          {/* TEKS NAVIGASI BAWAH YANG HILANG TELAH DIKEMBALIKAN! */}
           <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[450px] glass-nav border-2 border-white/60 rounded-[2rem] flex justify-between items-center px-2 py-2 z-[100] shadow-[0_10px_40px_rgba(0,0,0,0.15)]">
             <button onClick={() => setActiveTab('dash')} className={`flex flex-col items-center justify-center flex-1 h-14 rounded-2xl transition-all ${activeTab === 'dash' ? 'text-brand-600 bg-brand-50' : 'text-slate-400 hover:text-slate-600'}`}>
               <i className={`fa-solid fa-chart-pie text-[1.1rem] mb-1 ${activeTab === 'dash' ? 'drop-shadow-sm' : ''}`}></i>
@@ -475,6 +480,13 @@
 
                 <div className="overflow-y-auto px-8 py-6 custom-scrollbar">
                   <form id="fArsip" onSubmit={handleSimpan} className="grid grid-cols-2 gap-x-5 gap-y-6">
+                    
+                    {/* FITUR BARU: FORM JUDUL SURAT (Menempati 2 Kolom Penuh) */}
+                    <div className="col-span-2">
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Judul Surat</label>
+                      <input type="text" name="judulSurat" required placeholder="Judul / Nama Surat..." className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all" value={formData.judulSurat} onChange={handleInputChange} />
+                    </div>
+
                     <div className="col-span-1">
                       <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Tanggal</label>
                       <input type="date" name="tglSurat" required className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all" value={formData.tglSurat} onChange={handleInputChange} />
@@ -527,6 +539,7 @@
                     <div className="col-span-2">
                       <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Upload File (Semua Format - Maks 3MB)</label>
                       <div className="relative overflow-hidden">
+                        {/* FITUR UPLOAD BEBAS FORMAT */}
                         <input type="file" ref={fileInputRef} className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-3 py-3 focus:border-brand-500 focus:bg-white outline-none file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-brand-100 file:text-brand-600 hover:file:bg-brand-200 cursor-pointer" />
                       </div>
                     </div>
