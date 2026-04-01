@@ -6,16 +6,16 @@
   <title>E-ARSIP PKH TAPIN</title>
   <link rel="icon" href="https://lh3.googleusercontent.com/d/1k2xBp0kGKwnVMStAwSGcNM023CIyfBxS" type="image/png">
   
-  <!-- Font Premium: Plus Jakarta Sans -->
+  <!-- Font Premium -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
-  <!-- CDN Tailwind CSS & Bootstrap Icons -->
+  <!-- Tailwind CSS & FontAwesome (Sesuai Permintaan) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- CDN React & Babel Standalone -->
+  <!-- React & Babel Standalone -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
@@ -25,41 +25,34 @@
       theme: {
         extend: {
           fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
-          colors: {
-            brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' }
-          }
+          colors: { brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' } },
+          boxShadow: { '3d': '0 6px 0 0 rgba(0, 0, 0, 0.1)', '3d-hover': '0 2px 0 0 rgba(0, 0, 0, 0.1)' }
         }
       }
     }
   </script>
 
   <style>
-    /* Custom Scrollbar & Animations */
-    body { -webkit-tap-highlight-color: transparent; }
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    body { -webkit-tap-highlight-color: transparent; background-color: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     
-    .btn-3d { transition: all 0.15s ease; }
+    /* Efek 3D Expert */
+    .btn-3d { transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1); position: relative; top: 0; }
     .btn-3d:active { transform: translateY(4px); box-shadow: 0 0px 0 0 transparent !important; }
-
-    /* Glass Effect */
-    .glass-nav {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
+    
+    .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 selection:bg-brand-100">
+<body class="text-slate-800 selection:bg-brand-100">
 
-  <!-- Loader Awal Bawaan (Mempercepat Tampilan Awal) -->
+  <!-- Loader Cepat HTML Murni -->
   <div id="root">
     <div class="fixed inset-0 bg-slate-50 z-[9999] flex flex-col items-center justify-center">
-      <div class="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center">
-        <div class="w-12 h-12 border-4 border-slate-100 border-t-brand-500 rounded-full animate-spin mb-4"></div>
-        <span class="text-sm font-extrabold text-slate-800 tracking-wider animate-pulse">MEMUAT APLIKASI...</span>
+      <div class="bg-white p-8 rounded-[2rem] shadow-2xl flex flex-col items-center btn-3d shadow-3d">
+        <div class="w-16 h-16 border-8 border-slate-100 border-t-brand-500 rounded-full animate-spin mb-4"></div>
+        <span class="text-sm font-extrabold text-slate-800 tracking-widest animate-pulse">MEMUAT SISTEM...</span>
       </div>
     </div>
   </div>
@@ -68,31 +61,26 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     // =====================================================================
-    // GANTI LINK DI BAWAH INI DENGAN URL API WEB APP ANDA YANG BARU
-    const API_URL = "https://script.google.com/macros/s/AKfycbzs2enDrFzNF9DeHJ3jeXFFpH3Ze_gnO4L1V86WCbgCkuW3T1CHUI11KAb-alu5emU/exec"; 
+    // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
+    // PENTING: Pastikan URL berakhiran /exec (Bukan /edit)
+    const API_URL = "https://script.google.com/macros/s/AKfycbzQW9_OxIOsX83VlPOCLT_6Fk_faXsNVb_T6InTUvRiLIc2W7st_GQPDjr7F-tVGx-w/exec"; 
     // =====================================================================
 
     const getCategoryIconInfo = (kategori) => {
       const map = {
-        'Pemberitahuan': { icon: 'bi-bell-fill', color: 'text-amber-500', bg: 'bg-amber-100' },
-        'Laporan': { icon: 'bi-bar-chart-fill', color: 'text-emerald-500', bg: 'bg-emerald-100' },
-        'SK': { icon: 'bi-award-fill', color: 'text-rose-500', bg: 'bg-rose-100' },
-        'Nota Dinas': { icon: 'bi-file-earmark-text-fill', color: 'text-indigo-500', bg: 'bg-indigo-100' },
-        'File': { icon: 'bi-folder-fill', color: 'text-sky-500', bg: 'bg-sky-100' },
-        'Lainnya': { icon: 'bi-tags-fill', color: 'text-slate-500', bg: 'bg-slate-200' }
+        'Pemberitahuan': { icon: 'fa-solid fa-bell', color: 'text-amber-500', bg: 'bg-amber-100' },
+        'Laporan': { icon: 'fa-solid fa-chart-column', color: 'text-emerald-500', bg: 'bg-emerald-100' },
+        'SK': { icon: 'fa-solid fa-award', color: 'text-rose-500', bg: 'bg-rose-100' },
+        'Nota Dinas': { icon: 'fa-solid fa-file-contract', color: 'text-indigo-500', bg: 'bg-indigo-100' },
+        'File': { icon: 'fa-solid fa-folder-open', color: 'text-sky-500', bg: 'bg-sky-100' },
+        'Lainnya': { icon: 'fa-solid fa-tags', color: 'text-slate-500', bg: 'bg-slate-200' }
       };
       return map[kategori] || map['Lainnya'];
     };
 
     function App() {
-      // Mengingat tab saat direfresh
-      const [activeTab, setActiveTab] = useState(() => {
-        return localStorage.getItem('eArsipActiveTab') || 'dash';
-      });
-
-      useEffect(() => {
-        localStorage.setItem('eArsipActiveTab', activeTab);
-      }, [activeTab]);
+      const [activeTab, setActiveTab] = useState(() => localStorage.getItem('eArsipActiveTab') || 'dash');
+      useEffect(() => localStorage.setItem('eArsipActiveTab', activeTab), [activeTab]);
 
       const [isLoading, setIsLoading] = useState(false);
       const [toast, setToast] = useState({ show: false, msg: '', isError: false });
@@ -115,38 +103,37 @@
         pengirim: '', penerima: '', perihal: '', namaPenginput: ''
       });
 
-      useEffect(() => {
-        muatData();
-      }, []);
+      useEffect(() => { muatData(); }, []);
 
       const showToast = (msg, isError = false) => {
         setToast({ show: true, msg, isError });
-        setTimeout(() => setToast({ show: false, msg: '', isError: false }), 4500);
+        setTimeout(() => setToast({ show: false, msg: '', isError: false }), 4000);
       };
 
       const muatData = async () => {
         setIsLoading(true);
         try {
-          const response = await fetch(API_URL + "?action=getData");
-          const textResponse = await response.text();
+          // Logika Fetch Super Aman (Menggunakan redirect: 'follow')
+          const response = await fetch(API_URL + "?action=getData", { redirect: 'follow' });
+          if (!response.ok) throw new Error("Gagal terhubung ke jaringan Google.");
           
+          const textResponse = await response.text();
           let res;
           try {
             res = JSON.parse(textResponse);
           } catch(e) {
-            // ERROR HANDLING SANGAT AMAN: Mencegah layar putih blank!
-            throw new Error("API tidak valid! Pastikan Code.gs sudah di-Deploy versi baru.");
+            throw new Error("Link API Salah! Pastikan URL berakhiran /exec dan Apps Script sudah di-Deploy versi baru.");
           }
           
           if(res && res.status === 'success') {
-            setRawSheetData((res.sheetData && res.sheetData.tableData) ? res.sheetData.tableData : []);
-            setStats((res.sheetData && res.sheetData.stats) ? res.sheetData.stats : { masuk: 0, keluar: 0, kategori: {} });
+            setRawSheetData(res.sheetData && res.sheetData.tableData ? res.sheetData.tableData : []);
+            setStats(res.sheetData && res.sheetData.stats ? res.sheetData.stats : { masuk: 0, keluar: 0, kategori: {} });
             setRawDriveData(res.driveData ? res.driveData : []);
           } else {
-            throw new Error("Gagal mengambil data dari Database.");
+            throw new Error(res.message || "Data dari Database kosong atau error.");
           }
         } catch (err) {
-          showToast(err.message || "Gagal memuat data. Periksa koneksi/URL API.", true);
+          showToast(err.message, true);
         } finally {
           setIsLoading(false);
         }
@@ -158,11 +145,7 @@
       };
 
       const openModalForAdd = () => {
-        setFormData({
-          id: '', existingFileId: '', tglSurat: '', jenis: 'Surat Masuk', 
-          kategori: 'Pemberitahuan', sifat: 'Biasa', noSurat: '', 
-          pengirim: '', penerima: '', perihal: '', namaPenginput: ''
-        });
+        setFormData({ id: '', existingFileId: '', tglSurat: '', jenis: 'Surat Masuk', kategori: 'Pemberitahuan', sifat: 'Biasa', noSurat: '', pengirim: '', penerima: '', perihal: '', namaPenginput: '' });
         if (fileInputRef.current) fileInputRef.current.value = '';
         setIsModalOpen(true);
       };
@@ -170,19 +153,7 @@
       const editData = (id) => {
         const r = rawSheetData.find(x => x[0] === id);
         if (r) {
-          setFormData({
-            id: r[0], 
-            tglSurat: r[2] ? r[2].split('/').reverse().join('-') : '', 
-            jenis: r[3], 
-            sifat: r[4], 
-            kategori: r[5], 
-            noSurat: r[6],
-            pengirim: r[7], 
-            penerima: r[8], 
-            perihal: r[9], 
-            existingFileId: r[10], 
-            namaPenginput: r[11]
-          });
+          setFormData({ id: r[0], tglSurat: r[2] ? r[2].split('/').reverse().join('-') : '', jenis: r[3], sifat: r[4], kategori: r[5], noSurat: r[6], pengirim: r[7], penerima: r[8], perihal: r[9], existingFileId: r[10], namaPenginput: r[11] });
           if (fileInputRef.current) fileInputRef.current.value = '';
           setIsModalOpen(true);
         }
@@ -191,32 +162,32 @@
       const handleSimpan = async (e) => {
         e.preventDefault();
         const fl = fileInputRef.current ? fileInputRef.current.files[0] : null;
-        
         if (fl && fl.size > 3 * 1024 * 1024) {
-          showToast("Ukuran file maksimal 3MB!", true);
-          return;
+          showToast("Ukuran file maksimal 3MB!", true); return;
         }
 
         setIsLoading(true);
-        
         const sendData = async (objData) => {
           try {
             const response = await fetch(API_URL, {
               method: 'POST',
               body: JSON.stringify(objData),
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              redirect: 'follow'
             });
-            const data = await response.json();
+            const textData = await response.text();
+            let data;
+            try { data = JSON.parse(textData); } catch(e) { throw new Error("Terjadi kesalahan pada respon Server Google."); }
             
             if (data && data.status === 'success') {
               showToast(data.message);
               setIsModalOpen(false);
               muatData();
             } else {
-              showToast("Gagal: " + (data ? data.message : "Tidak ada respon"), true);
+              showToast("Gagal: " + (data ? data.message : "Tanpa respon"), true);
             }
           } catch (err) {
-            showToast("Terjadi kesalahan jaringan.", true);
+            showToast(err.message || "Gagal menyimpan data.", true);
           } finally {
             setIsLoading(false);
           }
@@ -225,13 +196,7 @@
         if (fl) {
           const reader = new FileReader();
           reader.onload = (ev) => {
-            const payload = {
-              ...formData,
-              fileData: ev.target.result.split(',')[1],
-              mimeType: fl.type,
-              fileName: fl.name
-            };
-            sendData(payload);
+            sendData({ ...formData, fileData: ev.target.result.split(',')[1], mimeType: fl.type, fileName: fl.name });
           };
           reader.readAsDataURL(fl);
         } else {
@@ -243,14 +208,7 @@
         const s = rawSheetData.find(r => r[5] === k);
         const v = (s && s[3] && s[3].toLowerCase().includes('keluar')) ? 'keluar' : 'masuk';
         setActiveTab(v);
-        if (v === 'keluar') setKatKeluar(k);
-        else setKatMasuk(k);
-      };
-
-      const exitApp = () => {
-        if (window.confirm("Keluar dari aplikasi?")) {
-          window.location.href = "https://google.com";
-        }
+        if (v === 'keluar') setKatKeluar(k); else setKatMasuk(k);
       };
 
       const filteredDriveFiles = useMemo(() => {
@@ -261,12 +219,8 @@
 
       const getFilteredList = (tipe, searchQ, katQ) => {
         let f = rawSheetData.filter(r => (r[3] || '').toLowerCase().includes(tipe));
-        if (searchQ) {
-          f = f.filter(r => (r[9] || '').toLowerCase().includes(searchQ.toLowerCase()) || (r[6] || '').toLowerCase().includes(searchQ.toLowerCase()));
-        }
-        if (katQ) {
-          f = f.filter(r => r[5] === katQ);
-        }
+        if (searchQ) f = f.filter(r => (r[9] || '').toLowerCase().includes(searchQ.toLowerCase()) || (r[6] || '').toLowerCase().includes(searchQ.toLowerCase()));
+        if (katQ) f = f.filter(r => r[5] === katQ);
         return f;
       };
 
@@ -274,9 +228,9 @@
       const listKeluar = useMemo(() => getFilteredList('keluar', searchKeluar, katKeluar), [rawSheetData, searchKeluar, katKeluar]);
 
       const SectionTitle = ({ icon, title }) => (
-        <h6 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4 mt-6">
-          <div className="w-8 h-8 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center">
-            <i className={`bi ${icon} text-lg`}></i>
+        <h6 className="text-sm font-extrabold text-slate-800 flex items-center gap-3 mb-4 mt-8 uppercase tracking-widest">
+          <div className="w-8 h-8 rounded-xl bg-brand-500 text-white flex items-center justify-center shadow-md shadow-brand-200">
+            <i className={`${icon}`}></i>
           </div>
           {title}
         </h6>
@@ -285,37 +239,34 @@
       const ArsipCard = ({ r }) => {
         const catInfo = getCategoryIconInfo(r[5]);
         return (
-          <div className="bg-white p-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-slate-100 mb-3 hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className={`absolute left-0 top-0 bottom-0 w-1 ${catInfo.bg}`}></div>
-            
+          <div className="bg-white p-5 rounded-[1.5rem] btn-3d shadow-sm border border-slate-200 mb-4 hover:shadow-md relative overflow-hidden group">
+            <div className={`absolute left-0 top-0 bottom-0 w-2 ${catInfo.bg}`}></div>
             <div className="flex justify-between items-start pl-2">
               <div className="max-w-[75%] pr-2">
-                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${catInfo.bg} ${catInfo.color}`}>
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <span className={`text-[10px] font-extrabold px-3 py-1 rounded-lg ${catInfo.bg} ${catInfo.color} uppercase tracking-wider`}>
                     {r[5]}
                   </span>
-                  <small className="text-slate-400 text-[10px] font-semibold">{r[2]}</small>
+                  <small className="text-slate-400 text-[10px] font-bold bg-slate-100 px-2 py-1 rounded-lg">{r[2]}</small>
                 </div>
-                {/* Teks tidak terpotong langsung, maksimal 2 baris */}
-                <b className="text-slate-800 block text-sm mb-2 leading-snug group-hover:text-brand-600 transition-colors line-clamp-2 break-words">{r[9]}</b>
-                <small className="text-slate-500 block text-xs font-medium mb-2">No: {r[6]}</small>
+                <b className="text-slate-800 block text-base font-bold mb-2 leading-snug group-hover:text-brand-600 transition-colors line-clamp-2 break-words">{r[9]}</b>
+                <small className="text-slate-500 block text-xs font-semibold mb-3"><i className="fa-solid fa-hashtag text-slate-300 mr-1"></i> {r[6]}</small>
                 
                 <div className="flex gap-2 flex-wrap">
-                  <small className="flex items-center gap-1 text-emerald-600 text-[10px] font-semibold bg-emerald-50 px-2 py-1 rounded-md line-clamp-1">
-                    <i className="bi bi-person-down flex-shrink-0"></i> <span className="line-clamp-1 break-words">{r[7]}</span>
+                  <small className="flex items-center gap-1.5 text-emerald-600 text-[10px] font-bold bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-lg line-clamp-1">
+                    <i className="fa-solid fa-arrow-down flex-shrink-0"></i> <span className="line-clamp-1">{r[7]}</span>
                   </small>
-                  <small className="flex items-center gap-1 text-indigo-600 text-[10px] font-semibold bg-indigo-50 px-2 py-1 rounded-md line-clamp-1">
-                    <i className="bi bi-person-up flex-shrink-0"></i> <span className="line-clamp-1 break-words">{r[8]}</span>
+                  <small className="flex items-center gap-1.5 text-indigo-600 text-[10px] font-bold bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-lg line-clamp-1">
+                    <i className="fa-solid fa-arrow-up flex-shrink-0"></i> <span className="line-clamp-1">{r[8]}</span>
                   </small>
                 </div>
               </div>
-
               <div className="flex flex-col gap-2 flex-shrink-0">
-                <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-brand-50 hover:text-brand-600 transition shadow-sm border border-slate-100">
-                  <i className="bi bi-eye-fill text-lg"></i>
+                <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-brand-500 hover:text-white transition-colors shadow-sm btn-3d">
+                  <i className="fa-solid fa-eye"></i>
                 </a>
-                <button onClick={() => editData(r[0])} className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-amber-50 hover:text-amber-600 transition shadow-sm border border-slate-100">
-                  <i className="bi bi-pencil-fill text-lg"></i>
+                <button onClick={() => editData(r[0])} className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-amber-500 hover:text-white transition-colors shadow-sm btn-3d">
+                  <i className="fa-solid fa-pen-to-square"></i>
                 </button>
               </div>
             </div>
@@ -324,111 +275,103 @@
       };
 
       return (
-        <div className="min-h-screen pb-32 font-sans bg-slate-50/50">
+        <div className="min-h-screen pb-32 font-sans relative">
           
-          <div className={`fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full shadow-xl flex items-center gap-3 text-sm font-bold z-[9999] transition-all duration-400 ${toast.show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-10 scale-95 pointer-events-none'} ${toast.isError ? 'bg-rose-500 text-white' : 'bg-slate-800 text-white'}`}>
-            <i className={`bi ${toast.isError ? 'bi-exclamation-triangle-fill text-rose-300' : 'bi-check-circle-fill text-emerald-400'} text-xl`}></i>
+          <div className={`fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold z-[9999] transition-all duration-400 ${toast.show ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-10 scale-95 pointer-events-none'} ${toast.isError ? 'bg-rose-500 text-white' : 'bg-slate-800 text-white'}`}>
+            <i className={`${toast.isError ? 'fa-solid fa-triangle-exclamation text-rose-300' : 'fa-solid fa-circle-check text-emerald-400'} text-xl`}></i>
             {toast.msg}
           </div>
 
           {isLoading && (
-            <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center">
-              <div className="bg-white p-6 rounded-3xl shadow-2xl flex flex-col items-center animate-[pulse_1.5s_infinite]">
-                <div className="w-12 h-12 border-4 border-slate-100 border-t-brand-500 rounded-full animate-spin mb-4"></div>
-                <span className="text-sm font-extrabold text-slate-800 tracking-wider">SINKRONISASI...</span>
+            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center">
+              <div className="bg-white p-8 rounded-[2rem] shadow-2xl flex flex-col items-center btn-3d shadow-3d">
+                <div className="w-16 h-16 border-8 border-slate-100 border-t-brand-500 rounded-full animate-spin mb-4"></div>
+                <span className="text-sm font-extrabold text-slate-800 tracking-widest animate-pulse">SINKRONISASI...</span>
               </div>
             </div>
           )}
 
-          <div className="glass-nav px-5 py-4 flex justify-between items-center sticky top-0 z-40 border-b border-white">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-white rounded-2xl shadow-sm p-1 border border-slate-100">
+          <div className="glass-nav px-6 py-4 flex justify-between items-center sticky top-0 z-40 border-b border-white shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white rounded-[1rem] shadow-md p-1 border border-slate-100 btn-3d">
                 <img src="https://lh3.googleusercontent.com/d/1k2xBp0kGKwnVMStAwSGcNM023CIyfBxS" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <div>
-                <h5 className="font-extrabold text-slate-800 text-lg leading-none tracking-tight mb-1">E-ARSIP <span className="text-brand-500">PKH</span></h5>
-                <small className="text-slate-500 text-[11px] font-semibold tracking-wide uppercase">Kabupaten Tapin</small>
+                <h5 className="font-black text-slate-800 text-xl leading-none tracking-tight mb-1">E-ARSIP <span className="text-brand-500">PKH</span></h5>
+                <small className="text-slate-500 text-[10px] font-extrabold tracking-widest uppercase">Kabupaten Tapin</small>
               </div>
             </div>
-            <button onClick={exitApp} className="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors border border-rose-100">
-              <i className="bi bi-power text-xl"></i>
+            <button onClick={() => window.confirm("Keluar dari aplikasi?") && (window.location.href="https://google.com")} className="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors shadow-sm btn-3d">
+              <i className="fa-solid fa-power-off"></i>
             </button>
           </div>
 
           <div className="p-5 max-w-2xl mx-auto">
-            
             <div className={activeTab === 'dash' ? 'block animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
               
-              <SectionTitle icon="bi-bar-chart-line-fill" title="Statistik Surat" />
-              <div className="grid grid-cols-2 gap-4 mb-2">
-                <div onClick={() => setActiveTab('masuk')} className="btn-3d cursor-pointer bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-3xl p-5 text-white shadow-[0_6px_0_#059669] relative overflow-hidden">
-                  <i className="bi bi-box-arrow-in-down absolute -right-4 -bottom-4 text-7xl opacity-20"></i>
-                  <div className="text-xs font-bold opacity-90 mb-1 tracking-wider">SURAT MASUK</div>
-                  <div className="text-4xl font-black">{stats.masuk}</div>
+              <SectionTitle icon="fa-solid fa-chart-pie" title="Statistik Surat" />
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div onClick={() => setActiveTab('masuk')} className="btn-3d shadow-[0_6px_0_#059669] cursor-pointer bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-[2rem] p-6 text-white relative overflow-hidden">
+                  <i className="fa-solid fa-inbox absolute -right-4 -bottom-4 text-[5rem] opacity-20 transform -rotate-12"></i>
+                  <div className="text-xs font-black opacity-90 mb-1 tracking-widest uppercase">SURAT MASUK</div>
+                  <div className="text-5xl font-black">{stats.masuk}</div>
                 </div>
-                
-                <div onClick={() => setActiveTab('keluar')} className="btn-3d cursor-pointer bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-3xl p-5 text-white shadow-[0_6px_0_#4338ca] relative overflow-hidden">
-                  <i className="bi bi-box-arrow-up absolute -right-4 -bottom-4 text-7xl opacity-20"></i>
-                  <div className="text-xs font-bold opacity-90 mb-1 tracking-wider">SURAT KELUAR</div>
-                  <div className="text-4xl font-black">{stats.keluar}</div>
+                <div onClick={() => setActiveTab('keluar')} className="btn-3d shadow-[0_6px_0_#4338ca] cursor-pointer bg-gradient-to-br from-indigo-400 to-indigo-500 rounded-[2rem] p-6 text-white relative overflow-hidden">
+                  <i className="fa-solid fa-paper-plane absolute -right-2 -bottom-2 text-[5rem] opacity-20 transform rotate-12"></i>
+                  <div className="text-xs font-black opacity-90 mb-1 tracking-widest uppercase">SURAT KELUAR</div>
+                  <div className="text-5xl font-black">{stats.keluar}</div>
                 </div>
               </div>
 
-              <SectionTitle icon="bi-grid-fill" title="Kategori Arsip" />
-              <div className="grid grid-cols-3 gap-3 mb-2">
+              <SectionTitle icon="fa-solid fa-layer-group" title="Kategori Arsip" />
+              <div className="grid grid-cols-3 gap-3 mb-4">
                 {Object.keys(stats.kategori || {}).map((k) => {
                   const catInfo = getCategoryIconInfo(k);
                   return (
-                    <div key={k} onClick={() => gotoKat(k)} className="bg-white rounded-2xl p-4 text-center shadow-sm border border-slate-100 cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-center items-center gap-2">
-                      <div className={`w-10 h-10 rounded-full ${catInfo.bg} ${catInfo.color} flex items-center justify-center flex-shrink-0`}>
-                        <i className={`bi ${catInfo.icon} text-lg`}></i>
+                    <div key={k} onClick={() => gotoKat(k)} className="bg-white rounded-[1.5rem] p-4 text-center shadow-sm border border-slate-200 cursor-pointer btn-3d flex flex-col justify-center items-center gap-3">
+                      <div className={`w-12 h-12 rounded-[1rem] ${catInfo.bg} ${catInfo.color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                        <i className={`${catInfo.icon} text-xl`}></i>
                       </div>
                       <div className="w-full">
-                        <b className="text-slate-800 block text-lg leading-none">{stats.kategori[k]}</b>
-                        <small className="text-[10px] text-slate-500 font-bold uppercase mt-1 block px-1 text-center leading-tight line-clamp-2">{k}</small>
+                        <b className="text-slate-800 block text-xl font-black leading-none">{stats.kategori[k]}</b>
+                        <small className="text-[9px] text-slate-500 font-extrabold uppercase mt-1.5 block px-1 text-center leading-tight line-clamp-2">{k}</small>
                       </div>
                     </div>
                   )
                 })}
               </div>
 
-              <SectionTitle icon="bi-google" title="File Google Drive" />
-              <div className="bg-white rounded-3xl p-2 shadow-sm border border-slate-100 mb-2">
+              <SectionTitle icon="fa-brands fa-google-drive" title="File Google Drive" />
+              <div className="bg-white rounded-[2rem] p-2 shadow-sm border border-slate-200 mb-4">
                 <div className="relative mb-3 p-2">
-                  <i className="bi bi-search absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                  <input 
-                    type="text" 
-                    className="w-full bg-slate-50 border-none text-slate-700 text-sm font-medium rounded-2xl pl-11 pr-4 py-3.5 focus:ring-2 focus:ring-brand-500 outline-none" 
-                    placeholder="Cari file di folder drive..." 
-                    value={searchDrive}
-                    onChange={(e) => setSearchDrive(e.target.value)}
-                  />
+                  <i className="fa-solid fa-magnifying-glass absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                  <input type="text" className="w-full bg-slate-100 border-none text-slate-700 text-sm font-bold rounded-2xl pl-11 pr-4 py-4 focus:ring-2 focus:ring-brand-500 outline-none transition-all" placeholder="Cari file di folder drive..." value={searchDrive} onChange={(e) => setSearchDrive(e.target.value)} />
                 </div>
                 <div className="max-h-[300px] overflow-y-auto px-2 pb-2 space-y-3 custom-scrollbar">
                   {rawDriveData.length === 0 ? (
-                    <div className="text-center text-slate-400 py-6 px-4 text-sm font-medium bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                      <i className="bi bi-cloud-slash-fill text-2xl text-slate-300 block mb-2"></i>
+                    <div className="text-center text-slate-400 py-8 px-4 text-sm font-bold bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                      <i className="fa-solid fa-cloud-arrow-down text-4xl text-slate-300 block mb-3"></i>
                       Belum ada file terbaca.<br/>
-                      <small className="font-normal text-[10px] mt-1 text-slate-400 block">Pastikan ID Folder Drive sudah benar di Apps Script.</small>
+                      <small className="font-medium text-[10px] mt-1 text-slate-400 block">Pastikan ID Folder Drive sudah disetting di Code.gs.</small>
                     </div>
                   ) : filteredDriveFiles.length === 0 ? (
-                    <div className="text-center text-slate-400 py-6 text-sm font-medium bg-slate-50 rounded-2xl border border-dashed border-slate-200">Pencarian tidak ditemukan</div>
+                    <div className="text-center text-slate-400 py-8 text-sm font-bold bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">Pencarian tidak ditemukan</div>
                   ) : (
                     filteredDriveFiles.map((f, i) => (
-                      <div key={i} className="group bg-white p-3 rounded-2xl border border-slate-100 hover:border-brand-200 hover:shadow-md transition-all flex justify-between items-start sm:items-center flex-col sm:flex-row gap-3">
+                      <div key={i} className="group bg-white p-3 rounded-2xl border border-slate-200 hover:border-brand-300 hover:shadow-md transition-all flex justify-between items-start sm:items-center flex-col sm:flex-row gap-3 btn-3d">
                         <div className="flex items-center gap-3 w-full sm:max-w-[80%]">
-                          <div className="w-11 h-11 rounded-xl bg-sky-50 text-sky-500 flex flex-shrink-0 items-center justify-center">
-                            <i className="bi bi-file-earmark-fill text-xl"></i>
+                          <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-500 flex flex-shrink-0 items-center justify-center">
+                            <i className="fa-solid fa-file-pdf text-2xl"></i>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="text-sm font-bold text-slate-700 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug" title={f.name}>{f.name}</div>
-                            <small className="text-slate-400 text-[10px] font-semibold flex items-center gap-1 mt-1">
-                              <i className="bi bi-cloud-check-fill text-emerald-500"></i> Diupload: {f.date}
+                            <div className="text-sm font-extrabold text-slate-700 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug" title={f.name}>{f.name}</div>
+                            <small className="text-slate-400 text-[10px] font-bold flex items-center gap-1.5 mt-1">
+                              <i className="fa-solid fa-cloud-arrow-up text-emerald-500"></i> Diupload: {f.date}
                             </small>
                           </div>
                         </div>
-                        <a href={f.url} target="_blank" rel="noreferrer" title="Download File" className="w-full sm:w-10 h-10 rounded-xl sm:rounded-full bg-brand-50 text-brand-600 sm:bg-slate-50 sm:text-brand-500 hover:bg-brand-500 hover:text-white flex flex-shrink-0 items-center justify-center transition-colors border border-brand-100 sm:border-slate-100 shadow-sm btn-3d">
-                          <i className="bi bi-cloud-download-fill text-lg"></i> <span className="sm:hidden font-bold ml-2 text-sm">Download File</span>
+                        <a href={f.url} target="_blank" rel="noreferrer" title="Download File" className="w-full sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-full bg-brand-50 text-brand-600 sm:bg-slate-100 sm:text-slate-500 hover:bg-brand-500 hover:text-white flex flex-shrink-0 items-center justify-center transition-colors shadow-sm">
+                          <i className="fa-solid fa-download text-lg"></i> <span className="sm:hidden font-black ml-2 text-sm tracking-wider">DOWNLOAD</span>
                         </a>
                       </div>
                     ))
@@ -436,189 +379,155 @@
                 </div>
               </div>
 
-              <SectionTitle icon="bi-clock-history" title="Baru Ditambahkan" />
+              <SectionTitle icon="fa-solid fa-clock-rotate-left" title="Baru Ditambahkan" />
               <div className="space-y-3">
                 {recentFiles.map((r, i) => (
-                  <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center hover:shadow-md transition-shadow">
+                  <div key={i} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center hover:shadow-md transition-shadow btn-3d">
                     <div className="flex items-center gap-3 max-w-[80%]">
-                      <div className="w-2 h-2 rounded-full bg-brand-500 flex-shrink-0"></div>
+                      <div className="w-3 h-3 rounded-full bg-brand-500 flex-shrink-0 shadow-sm"></div>
                       <div>
-                        <div className="text-sm text-slate-800 font-bold line-clamp-2 break-words leading-snug">{r[9]}</div>
-                        <small className="text-slate-400 text-[10px] font-semibold block mt-1">{r[2]} • {r[6]}</small>
+                        <div className="text-sm text-slate-800 font-extrabold line-clamp-2 break-words leading-snug">{r[9]}</div>
+                        <small className="text-slate-500 text-[10px] font-bold block mt-1"><i className="fa-regular fa-calendar mr-1"></i> {r[2]} • <i className="fa-solid fa-hashtag ml-1 mr-1"></i> {r[6]}</small>
                       </div>
                     </div>
-                    <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-10 h-10 flex flex-shrink-0 items-center justify-center bg-slate-50 text-brand-500 rounded-xl hover:bg-brand-50 transition border border-slate-100">
-                      <i className="bi bi-eye-fill"></i>
+                    <a href={`https://drive.google.com/file/d/${r[10]}/view`} target="_blank" rel="noreferrer" className="w-10 h-10 flex flex-shrink-0 items-center justify-center bg-slate-100 text-brand-500 rounded-[1rem] hover:bg-brand-500 hover:text-white transition border border-slate-200">
+                      <i className="fa-solid fa-eye"></i>
                     </a>
                   </div>
                 ))}
               </div>
-
-              <div className="text-center text-[10px] text-slate-400 mt-12 pb-4 pt-4 font-medium flex items-center justify-center gap-1">
-                <i className="bi bi-code-slash"></i> Developer by <b className="text-slate-600">M. Zaen Syachrullah V2.2026</b>
+              <div className="text-center text-[10px] text-slate-400 mt-12 pb-4 pt-4 font-extrabold flex items-center justify-center gap-1 uppercase tracking-widest">
+                <i className="fa-solid fa-code"></i> Developer by <b className="text-slate-600">M. Zaen Syachrullah V2.2026</b>
               </div>
             </div>
 
-            {/* VIEW: SURAT MASUK & KELUAR */}
             {['masuk', 'keluar'].map((tipe) => (
               <div key={tipe} className={activeTab === tipe ? 'block animate-in fade-in slide-in-from-bottom-4 duration-300' : 'hidden'}>
-                <SectionTitle 
-                  icon={tipe === 'masuk' ? 'bi-box-arrow-in-down' : 'bi-box-arrow-up'} 
-                  title={`Daftar Surat ${tipe === 'masuk' ? 'Masuk' : 'Keluar'}`} 
-                />
-                
-                <div className="bg-white p-2 rounded-3xl shadow-sm border border-slate-100 flex gap-2 mb-4">
+                <SectionTitle icon={tipe === 'masuk' ? 'fa-solid fa-inbox' : 'fa-solid fa-paper-plane'} title={`Daftar Surat ${tipe === 'masuk' ? 'Masuk' : 'Keluar'}`} />
+                <div className="bg-white p-2 rounded-[2rem] shadow-sm border border-slate-200 flex gap-2 mb-4">
                   <div className="relative flex-1">
-                    <i className="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input 
-                      type="text" 
-                      className="w-full bg-transparent border-none text-sm font-medium pl-10 pr-3 py-3 focus:outline-none" 
-                      placeholder="Cari surat..." 
-                      value={tipe === 'masuk' ? searchMasuk : searchKeluar} 
-                      onChange={(e) => tipe === 'masuk' ? setSearchMasuk(e.target.value) : setSearchKeluar(e.target.value)} 
-                    />
+                    <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" className="w-full bg-transparent border-none text-sm font-bold pl-11 pr-3 py-4 focus:outline-none" placeholder="Cari surat..." value={tipe === 'masuk' ? searchMasuk : searchKeluar} onChange={(e) => tipe === 'masuk' ? setSearchMasuk(e.target.value) : setSearchKeluar(e.target.value)} />
                   </div>
-                  <div className="w-[1px] bg-slate-100 my-2"></div>
-                  <select 
-                    className="w-[130px] bg-transparent border-none text-xs font-bold text-slate-600 px-3 py-3 focus:outline-none cursor-pointer" 
-                    value={tipe === 'masuk' ? katMasuk : katKeluar} 
-                    onChange={(e) => tipe === 'masuk' ? setKatMasuk(e.target.value) : setKatKeluar(e.target.value)}
-                  >
+                  <div className="w-[2px] bg-slate-100 my-2"></div>
+                  <select className="w-[140px] bg-transparent border-none text-xs font-extrabold text-slate-600 px-3 py-4 focus:outline-none cursor-pointer uppercase tracking-wider" value={tipe === 'masuk' ? katMasuk : katKeluar} onChange={(e) => tipe === 'masuk' ? setKatMasuk(e.target.value) : setKatKeluar(e.target.value)}>
                     <option value="">Semua Kategori</option>
                     {Object.keys(stats.kategori || {}).map(k => <option key={k} value={k}>{k}</option>)}
                   </select>
                 </div>
-
                 <div>
                   {(tipe === 'masuk' ? listMasuk : listKeluar).length > 0 
                     ? (tipe === 'masuk' ? listMasuk : listKeluar).map(r => <ArsipCard key={r[0]} r={r} />) 
-                    : <div className="text-center text-slate-400 py-12 text-sm font-medium bg-white rounded-3xl border border-dashed border-slate-200">Data tidak ditemukan</div>
+                    : <div className="text-center text-slate-400 py-16 text-sm font-bold bg-white rounded-[2rem] border-2 border-dashed border-slate-200"><i className="fa-solid fa-folder-open text-4xl block mb-3 text-slate-300"></i>Data tidak ditemukan</div>
                   }
                 </div>
               </div>
             ))}
-
           </div>
 
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] glass-nav border border-white/60 rounded-full flex justify-between items-center px-2 py-2 z-[100] shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
-            
-            <button onClick={() => setActiveTab('dash')} className={`flex flex-col items-center justify-center w-16 h-12 rounded-full transition-all ${activeTab === 'dash' ? 'text-brand-600 bg-brand-50' : 'text-slate-400 hover:text-slate-600'}`}>
-              <i className={`bi bi-grid-fill text-xl mb-0.5 ${activeTab === 'dash' ? 'drop-shadow-sm' : ''}`}></i>
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[420px] glass-nav border-2 border-white/60 rounded-[2rem] flex justify-between items-center px-3 py-3 z-[100] shadow-[0_10px_40px_rgba(0,0,0,0.15)]">
+            <button onClick={() => setActiveTab('dash')} className={`flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-2xl transition-all ${activeTab === 'dash' ? 'text-brand-600 bg-brand-50' : 'text-slate-400 hover:text-slate-600'}`}>
+              <i className={`fa-solid fa-house text-xl ${activeTab === 'dash' ? 'drop-shadow-sm' : ''}`}></i>
             </button>
-            
-            <button onClick={() => setActiveTab('masuk')} className={`flex flex-col items-center justify-center w-16 h-12 rounded-full transition-all ${activeTab === 'masuk' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}>
-              <i className={`bi bi-box-arrow-in-down text-xl mb-0.5 ${activeTab === 'masuk' ? 'drop-shadow-sm' : ''}`}></i>
+            <button onClick={() => setActiveTab('masuk')} className={`flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-2xl transition-all ${activeTab === 'masuk' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}>
+              <i className={`fa-solid fa-inbox text-xl ${activeTab === 'masuk' ? 'drop-shadow-sm' : ''}`}></i>
             </button>
             
             <div className="relative -top-8 mx-1">
-              <button onClick={openModalForAdd} className="btn-3d w-16 h-16 bg-gradient-to-tr from-brand-500 to-brand-400 text-white rounded-full flex items-center justify-center shadow-[0_6px_0_#0284c7,0_15px_20px_rgba(14,165,233,0.4)] border-4 border-slate-50/50">
-                <i className="bi bi-plus text-4xl"></i>
+              <button onClick={openModalForAdd} className="btn-3d w-16 h-16 bg-gradient-to-tr from-brand-500 to-brand-400 text-white rounded-full flex items-center justify-center shadow-[0_6px_0_#0284c7,0_15px_20px_rgba(14,165,233,0.4)] border-4 border-white">
+                <i className="fa-solid fa-plus text-3xl"></i>
               </button>
             </div>
 
-            <button onClick={() => setActiveTab('keluar')} className={`flex flex-col items-center justify-center w-16 h-12 rounded-full transition-all ${activeTab === 'keluar' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600'}`}>
-              <i className={`bi bi-box-arrow-up text-xl mb-0.5 ${activeTab === 'keluar' ? 'drop-shadow-sm' : ''}`}></i>
+            <button onClick={() => setActiveTab('keluar')} className={`flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-2xl transition-all ${activeTab === 'keluar' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600'}`}>
+              <i className={`fa-solid fa-paper-plane text-xl ${activeTab === 'keluar' ? 'drop-shadow-sm' : ''}`}></i>
             </button>
-            
-            <button onClick={muatData} className="flex flex-col items-center justify-center w-16 h-12 rounded-full text-slate-400 hover:text-amber-500 hover:bg-amber-50 transition-all">
-              <i className="bi bi-arrow-repeat text-xl mb-0.5"></i>
+            <button onClick={muatData} className="flex flex-col items-center justify-center w-[4.5rem] h-12 rounded-2xl text-slate-400 hover:text-amber-500 hover:bg-amber-50 transition-all">
+              <i className="fa-solid fa-rotate-right text-xl"></i>
             </button>
           </div>
 
           {isModalOpen && (
-            <div className="fixed inset-0 z-[1001] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
-              <div className="bg-white w-full max-w-lg rounded-t-[2rem] sm:rounded-3xl max-h-[90vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 duration-300">
-                
-                <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 sm:hidden"></div>
-
-                <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
-                  <h6 className="font-extrabold text-slate-800 text-lg m-0 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
-                      <i className="bi bi-pencil-square text-sm"></i>
+            <div className="fixed inset-0 z-[1001] flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
+              <div className="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-3xl max-h-[90vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 duration-300">
+                <div className="w-14 h-1.5 bg-slate-200 rounded-full mx-auto mt-4 sm:hidden"></div>
+                <div className="flex justify-between items-center px-8 py-5 border-b border-slate-100">
+                  <h6 className="font-black text-slate-800 text-lg m-0 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-brand-100 text-brand-600 flex items-center justify-center shadow-sm">
+                      <i className="fa-solid fa-pen-clip text-lg"></i>
                     </div>
-                    {formData.id ? 'Edit Arsip' : 'Arsip Baru'}
+                    {formData.id ? 'EDIT ARSIP' : 'ARSIP BARU'}
                   </h6>
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="w-8 h-8 flex items-center justify-center text-slate-400 bg-slate-100 hover:text-rose-500 hover:bg-rose-100 rounded-full transition">
-                    <i className="bi bi-x-lg"></i>
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="w-10 h-10 flex items-center justify-center text-slate-400 bg-slate-100 hover:text-rose-500 hover:bg-rose-100 rounded-full transition btn-3d">
+                    <i className="fa-solid fa-xmark text-xl"></i>
                   </button>
                 </div>
 
-                <div className="overflow-y-auto px-6 py-5 custom-scrollbar">
-                  <form id="fArsip" onSubmit={handleSimpan} className="grid grid-cols-2 gap-x-4 gap-y-5">
-                    
+                <div className="overflow-y-auto px-8 py-6 custom-scrollbar">
+                  <form id="fArsip" onSubmit={handleSimpan} className="grid grid-cols-2 gap-x-5 gap-y-6">
                     <div className="col-span-1">
-                      <label className="block text-[11px] font-extrabold text-slate-500 mb-1.5 ml-1">TANGGAL</label>
-                      <input type="date" name="tglSurat" required className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-2xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all" value={formData.tglSurat} onChange={handleInputChange} />
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Tanggal</label>
+                      <input type="date" name="tglSurat" required className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all" value={formData.tglSurat} onChange={handleInputChange} />
                     </div>
-                    
                     <div className="col-span-1">
-                      <label className="block text-[11px] font-extrabold text-slate-500 mb-1.5 ml-1">JENIS SURAT</label>
-                      <select name="jenis" className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-2xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all appearance-none" value={formData.jenis} onChange={handleInputChange}>
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Jenis Surat</label>
+                      <select name="jenis" className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all appearance-none" value={formData.jenis} onChange={handleInputChange}>
                         <option>Surat Masuk</option><option>Surat Keluar</option>
                       </select>
                     </div>
-
                     <div className="col-span-1">
-                      <label className="block text-[11px] font-extrabold text-slate-500 mb-1.5 ml-1">KATEGORI</label>
-                      <select name="kategori" className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-2xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all appearance-none" value={formData.kategori} onChange={handleInputChange}>
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Kategori</label>
+                      <select name="kategori" className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all appearance-none" value={formData.kategori} onChange={handleInputChange}>
                         <option>Pemberitahuan</option><option>Laporan</option><option>SK</option>
                         <option>Nota Dinas</option><option>File</option><option>Lainnya</option>
                       </select>
                     </div>
-
                     <div className="col-span-1">
-                      <label className="block text-[11px] font-extrabold text-slate-500 mb-1.5 ml-1">SIFAT</label>
-                      <select name="sifat" className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-2xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all appearance-none" value={formData.sifat} onChange={handleInputChange}>
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Sifat</label>
+                      <select name="sifat" className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all appearance-none" value={formData.sifat} onChange={handleInputChange}>
                         <option>Biasa</option><option>Penting</option><option>Rahasia</option>
                       </select>
                     </div>
-
                     <div className="col-span-2">
-                      <label className="block text-[11px] font-extrabold text-slate-500 mb-1.5 ml-1">NOMOR SURAT</label>
-                      <input type="text" name="noSurat" required placeholder="Masukkan nomor surat..." className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-2xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all" value={formData.noSurat} onChange={handleInputChange} />
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Nomor Surat</label>
+                      <input type="text" name="noSurat" required placeholder="Masukkan nomor surat..." className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all" value={formData.noSurat} onChange={handleInputChange} />
                     </div>
-
                     <div className="col-span-1">
-                      <label className="block text-[11px] font-extrabold text-slate-500 mb-1.5 ml-1">PENGIRIM</label>
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Pengirim</label>
                       <div className="relative">
-                        <i className="bi bi-person absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" name="pengirim" required placeholder="Instansi..." className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-2xl pl-10 pr-4 py-3 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all" value={formData.pengirim} onChange={handleInputChange} />
+                        <i className="fa-solid fa-building absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" name="pengirim" required placeholder="Instansi..." className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl pl-11 pr-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all" value={formData.pengirim} onChange={handleInputChange} />
                       </div>
                     </div>
-
                     <div className="col-span-1">
-                      <label className="block text-[11px] font-extrabold text-slate-500 mb-1.5 ml-1">PENERIMA</label>
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Penerima</label>
                       <div className="relative">
-                        <i className="bi bi-person-check absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" name="penerima" required placeholder="Nama..." className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-2xl pl-10 pr-4 py-3 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all" value={formData.penerima} onChange={handleInputChange} />
+                        <i className="fa-solid fa-user-check absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" name="penerima" required placeholder="Nama..." className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl pl-11 pr-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all" value={formData.penerima} onChange={handleInputChange} />
                       </div>
                     </div>
-
                     <div className="col-span-2">
-                      <label className="block text-[11px] font-extrabold text-slate-500 mb-1.5 ml-1">PERIHAL SURAT</label>
-                      <textarea name="perihal" rows="2" required placeholder="Ringkasan perihal surat..." className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-2xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all resize-none" value={formData.perihal} onChange={handleInputChange}></textarea>
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Perihal Surat</label>
+                      <textarea name="perihal" rows="2" required placeholder="Ringkasan perihal surat..." className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all resize-none" value={formData.perihal} onChange={handleInputChange}></textarea>
                     </div>
-
                     <div className="col-span-2">
-                      <label className="block text-[11px] font-extrabold text-slate-500 mb-1.5 ml-1">PETUGAS INPUT</label>
-                      <input type="text" name="namaPenginput" required placeholder="Nama Anda..." className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-2xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition-all" value={formData.namaPenginput} onChange={handleInputChange} />
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Petugas Input</label>
+                      <input type="text" name="namaPenginput" required placeholder="Nama Anda..." className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-4 py-3.5 focus:border-brand-500 focus:bg-white outline-none transition-all" value={formData.namaPenginput} onChange={handleInputChange} />
                     </div>
-
                     <div className="col-span-2">
-                      <label className="block text-[11px] font-extrabold text-slate-500 mb-1.5 ml-1">DOKUMEN SCAN (Maks 3MB)</label>
+                      <label className="block text-[10px] font-black text-slate-400 mb-2 ml-1 tracking-widest uppercase">Dokumen Scan (Maks 3MB)</label>
                       <div className="relative overflow-hidden">
-                        <input type="file" ref={fileInputRef} className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-2xl px-3 py-2.5 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand-100 file:text-brand-600 hover:file:bg-brand-200 cursor-pointer" accept="image/*,application/pdf" />
+                        <input type="file" ref={fileInputRef} className="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 text-sm font-bold rounded-2xl px-3 py-3 focus:border-brand-500 focus:bg-white outline-none file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-brand-100 file:text-brand-600 hover:file:bg-brand-200 cursor-pointer" accept="image/*,application/pdf" />
                       </div>
                     </div>
                   </form>
                 </div>
 
-                <div className="p-6 border-t border-slate-100 bg-white sm:rounded-b-3xl">
-                  <button type="submit" form="fArsip" className="btn-3d w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-500 to-brand-400 text-white font-extrabold tracking-widest text-sm py-4 rounded-2xl shadow-[0_6px_0_#0284c7] hover:shadow-[0_2px_0_#0284c7] focus:outline-none">
-                    SIMPAN ARSIP <i className="bi bi-send-fill text-lg animate-pulse"></i>
+                <div className="p-8 border-t border-slate-100 bg-white sm:rounded-b-3xl">
+                  <button type="submit" form="fArsip" className="btn-3d w-full flex items-center justify-center gap-3 bg-gradient-to-r from-brand-500 to-brand-400 text-white font-black tracking-widest text-sm py-5 rounded-2xl shadow-[0_6px_0_#0284c7] hover:shadow-[0_2px_0_#0284c7] focus:outline-none">
+                    SIMPAN ARSIP <i className="fa-solid fa-paper-plane text-lg animate-pulse"></i>
                   </button>
                 </div>
-
               </div>
             </div>
           )}
